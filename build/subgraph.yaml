@@ -1,0 +1,67 @@
+specVersion: 0.0.2
+description: PoolFactory for Spartan Protocol
+repository: https://github.com/spartan-protocol/spartan-protocol-subgraph
+schema:
+  file: schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: PoolFactory
+    network: chapel
+    source:
+      address: "0x88B0A87189d140EfD460D5A1b9b8Cbc77F2910E5"
+      abi: PoolFactory
+      startBlock: 9602125
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: PoolFactory\PoolFactory.wasm
+      entities:
+        - Pool
+        - Token
+      abis:
+        - name: PoolFactory
+          file: PoolFactory\abis\PoolFactory.json
+        - name: iBEP20
+          file: PoolFactory\abis\iBEP20.json
+        - name: iBEP20SymbolBytes
+          file: PoolFactory\abis\iBEP20SymbolBytes.json
+        - name: iBEP20NameBytes
+          file: PoolFactory\abis\iBEP20NameBytes.json
+        - name: Pool
+          file: PoolFactory\abis\Pool.json
+      eventHandlers:
+        - event: CreatePool(indexed address,indexed address)
+          handler: handleCreatePool
+templates:
+  - kind: ethereum/contract
+    name: Pool
+    network: chapel
+    source:
+      abi: Pool
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: templates\Pool\Pool.wasm
+      entities:
+        - Pool
+        - Token
+      abis:
+        - name: Pool
+          file: Pool\abis\Pool.json
+        - name: Factory
+          file: Pool\abis\PoolFactory.json
+        - name: iBEP20
+          file: Pool\abis\iBEP20.json
+      eventHandlers:
+        - event: AddLiquidity(indexed address,uint256,uint256,uint256)
+          handler: handleAddLiquidity
+        - event: RemoveLiquidity(indexed address,uint256,uint256,uint256)
+          handler: handleRemoveLiquidity
+        - event: Swapped(indexed address,indexed address,indexed address,uint256,uint256,uint256)
+          handler: handleSwapped
+        - event: MintSynth(indexed address,indexed address,uint256,indexed address,uint256)
+          handler: handleMintSynth
+        - event: BurnSynth(indexed address,indexed address,uint256,indexed address,uint256)
+          handler: handleBurnSynth

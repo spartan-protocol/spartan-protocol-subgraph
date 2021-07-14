@@ -1,0 +1,16 @@
+{
+  "name": "pool-factory",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen",
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ spartan-protocol/pool-factory",
+    "create-local": "graph create --node http://localhost:8020/ spartan-protocol/pool-factory",
+    "remove-local": "graph remove --node http://localhost:8020/ spartan-protocol/pool-factory",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 spartan-protocol/pool-factory"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.21.0",
+    "@graphprotocol/graph-ts": "0.20.0"
+  }
+}

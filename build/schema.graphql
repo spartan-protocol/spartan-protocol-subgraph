@@ -1,0 +1,141 @@
+type PoolFactory @entity {
+  id: ID! # PoolFactory contract address
+  curatedPoolSize: BigInt! # Max curated pool count
+  poolCount: BigInt! # Listed pools count
+  tokenCount: BigInt! # Listed tokens count
+  curatedCount: BigInt! # Curated pools count
+}
+
+type Token @entity {
+  id: ID! # Token contract address
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+  totalSupply: BigInt!
+}
+
+type Pool @entity {
+  id: ID! # Pool contract address
+  token0: Token! # Token contract address
+  genesis: BigInt! # Timestamp of pool creation
+  symbol: String!
+  name: String!
+  decimals: BigInt!
+  totalSupply: BigInt!
+  baseAmount: BigInt! # SPARTA balance
+  tokenAmount: BigInt! # TOKEN balance
+  curated: Boolean! # Pool's curated status
+  fees: BigInt! # Slip fees paid into the pool
+  liqAdd: [LiqAdd!]! @derivedFrom(field: "pool")
+  liqRemove: [LiqRemove!]! @derivedFrom(field: "pool")
+  swap: [Swap!]! @derivedFrom(field: "pool")
+  mintSynth: [MintSynth!]! @derivedFrom(field: "pool")
+  burnSynth: [BurnSynth!]! @derivedFrom(field: "pool")
+  stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
+}
+
+type LiqAdd @entity {
+  id: ID! # TxnHash + logIndex
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  token: Token!
+  member: Bytes!
+  sender: Bytes!
+  recipient: Bytes!
+  contract: Bytes! # Contract address calling the event
+  inputToken: BigDecimal!
+  inputSparta: BigDecimal!
+  inputUSD: BigDecimal!
+  mintedLPs: BigDecimal!
+}
+
+type LiqRemove @entity {
+  id: ID! # TxnHash + logIndex
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  token: Token!
+  member: Bytes!
+  sender: Bytes!
+  recipient: Bytes!
+  contract: Bytes! # Contract address calling the event
+  burnedLPs: BigDecimal!
+  outputSparta: BigDecimal!
+  outputToken: BigDecimal!
+  outputUSD: BigDecimal!
+}
+
+type Swap @entity {
+  id: ID! # TxnHash + logIndex
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  fromToken: Token!
+  toToken: Token!
+  token: Token!
+  member: Bytes!
+  sender: Bytes!
+  recipient: Bytes!
+  contract: Bytes! # Contract address calling the event
+  fromAmount: BigDecimal!
+  toAmount: BigDecimal!
+  amountUSD: BigDecimal!
+}
+
+type MintSynth @entity {
+  id: ID! # TxnHash + logIndex
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  token: Token!
+  member: Bytes!
+  sender: Bytes!
+  recipient: Bytes!
+  contract: Bytes! # Contract address calling the event
+  inputSparta: BigDecimal!
+  inputUSD: BigDecimal!
+  mintedSynths: BigDecimal!
+}
+
+type BurnSynth @entity {
+  id: ID! # TxnHash + logIndex
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  token: Token!
+  member: Bytes!
+  sender: Bytes!
+  recipient: Bytes!
+  contract: Bytes! # Contract address calling the event
+  burnedSynths: BigDecimal!
+  outputSparta: BigDecimal!
+  outputUSD: BigDecimal!
+}
+
+type MetricsGlobalDay @entity {
+  id: ID! # Timestamp
+  date: Int! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
+  volSPARTA: BigDecimal! # Daily volume in SPARTA
+  volBNB: BigDecimal! # Daily volume in BNB
+  volUSD: BigDecimal! # Daily volume in USD
+  fees: BigDecimal! # Daily slip fees in SPARTA
+  feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
+  txCount: BigInt! # Daily txns
+  tvlSPARTA: BigDecimal!
+  tvlUSD: BigDecimal!
+}
+
+type MetricsPoolDay @entity {
+  id: ID! # Pool address + Timestamp
+  date: Int! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
+  pool: Pool!
+  volSPARTA: BigDecimal! # Daily volume in SPARTA
+  volBNB: BigDecimal! # Daily volume in BNB
+  volUSD: BigDecimal! # Daily volume in USD
+  fees: BigDecimal! # Daily slip fees in SPARTA
+  feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
+  txCount: BigInt! # Daily txns
+  tvlSPARTA: BigDecimal!
+  tvlUSD: BigDecimal!
+}
