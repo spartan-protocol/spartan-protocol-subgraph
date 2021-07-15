@@ -1,38 +1,32 @@
-import { BigInt } from "@graphprotocol/graph-ts";
-import {
-  AddCuratePool,
-  CreatePool,
-  RemoveCuratePool,
-} from "../generated/PoolFactory/PoolFactory";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { CreatePool } from "../generated/PoolFactory/PoolFactory";
 import { PoolFactory, Token, Pool } from "../generated/schema";
-import { addr_poolFactory, stableCoins, ZERO_BI } from "./const";
-import {
-  fetchTokenDecimals,
-  fetchTokenName,
-  fetchTokenSymbol,
-  fetchTokenTotalSupply,
-} from "./utils";
-
-export function handleAddCuratePool(event: AddCuratePool): void {}
+import { Pool as PoolTemplate } from "../generated/templates";
+import { addr_bnb, addr_poolFactory, ONE_BI, stableCoins, ZERO_BD, ZERO_BI } from "./const";
+import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol } from "./utils";
 
 export function handleCreatePool(event: CreatePool): void {
   // Load/create poolFactory
   let poolFactory = PoolFactory.load(addr_poolFactory);
   if (!poolFactory) {
     poolFactory = new PoolFactory(addr_poolFactory);
-    poolFactory.curatedPoolSize = ZERO_BI;
     poolFactory.poolCount = ZERO_BI;
     poolFactory.tokenCount = ZERO_BI;
-    poolFactory.curatedCount = ZERO_BI;
   }
   // Load/create token
   let token = Token.load(event.params.token.toHexString());
   if (!token) {
     token = new Token(event.params.token.toHexString());
-    token.symbol = fetchTokenSymbol(event.params.token);
-    token.name = fetchTokenName(event.params.token);
-    token.decimals = fetchTokenDecimals(event.params.token);
-    token.totalSupply = fetchTokenTotalSupply(event.params.token);
+    if (event.params.token == Address.fromString(addr_bnb)) {
+      token.symbol = "BNB";
+      token.name = "Binance Coin";
+      token.decimals = BigInt.fromI32(18);
+    } else {
+      token.symbol = fetchTokenSymbol(event.params.token);
+      token.name = fetchTokenName(event.params.token);
+      token.decimals = fetchTokenDecimals(event.params.token);
+    }
+    poolFactory.tokenCount = poolFactory.tokenCount.plus(ONE_BI)
   }
   // Load/create Pool
   let pool = Pool.load(event.params.pool.toHexString());
@@ -43,13 +37,18 @@ export function handleCreatePool(event: CreatePool): void {
     pool.symbol = token.symbol + "-SPP";
     pool.name = token.name + "-SpartanProtocolPool";
     pool.decimals = BigInt.fromI32(18);
-    pool.totalSupply = ZERO_BI;
-    pool.baseAmount = ZERO_BI;
-    pool.tokenAmount = ZERO_BI;
-    pool.curated = false;
-    pool.fees = ZERO_BI;
+    pool.totalSupply = ZERO_BD;
+    pool.baseAmount = ZERO_BD;
+    pool.tokenAmount = ZERO_BD;
+    // pool.curated = false;
+    pool.fees = ZERO_BD;
     pool.stablecoin = stableCoins.includes(token.id);
+    poolFactory.poolCount = poolFactory.poolCount.plus(ONE_BI)
   }
-}
 
-export function handleRemoveCuratePool(event: RemoveCuratePool): void {}
+  poolFactory.save();
+  token.save();
+  pool.save();
+  // Use template to create contract
+  PoolTemplate.create(event.params.pool);
+}

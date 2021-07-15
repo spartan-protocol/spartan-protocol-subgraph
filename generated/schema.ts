@@ -42,15 +42,6 @@ export class PoolFactory extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get curatedPoolSize(): BigInt {
-    let value = this.get("curatedPoolSize");
-    return value.toBigInt();
-  }
-
-  set curatedPoolSize(value: BigInt) {
-    this.set("curatedPoolSize", Value.fromBigInt(value));
-  }
-
   get poolCount(): BigInt {
     let value = this.get("poolCount");
     return value.toBigInt();
@@ -67,15 +58,6 @@ export class PoolFactory extends Entity {
 
   set tokenCount(value: BigInt) {
     this.set("tokenCount", Value.fromBigInt(value));
-  }
-
-  get curatedCount(): BigInt {
-    let value = this.get("curatedCount");
-    return value.toBigInt();
-  }
-
-  set curatedCount(value: BigInt) {
-    this.set("curatedCount", Value.fromBigInt(value));
   }
 }
 
@@ -134,15 +116,6 @@ export class Token extends Entity {
 
   set decimals(value: BigInt) {
     this.set("decimals", Value.fromBigInt(value));
-  }
-
-  get totalSupply(): BigInt {
-    let value = this.get("totalSupply");
-    return value.toBigInt();
-  }
-
-  set totalSupply(value: BigInt) {
-    this.set("totalSupply", Value.fromBigInt(value));
   }
 }
 
@@ -221,94 +194,85 @@ export class Pool extends Entity {
     this.set("decimals", Value.fromBigInt(value));
   }
 
-  get totalSupply(): BigInt {
+  get totalSupply(): BigDecimal {
     let value = this.get("totalSupply");
-    return value.toBigInt();
+    return value.toBigDecimal();
   }
 
-  set totalSupply(value: BigInt) {
-    this.set("totalSupply", Value.fromBigInt(value));
+  set totalSupply(value: BigDecimal) {
+    this.set("totalSupply", Value.fromBigDecimal(value));
   }
 
-  get baseAmount(): BigInt {
+  get baseAmount(): BigDecimal {
     let value = this.get("baseAmount");
-    return value.toBigInt();
+    return value.toBigDecimal();
   }
 
-  set baseAmount(value: BigInt) {
-    this.set("baseAmount", Value.fromBigInt(value));
+  set baseAmount(value: BigDecimal) {
+    this.set("baseAmount", Value.fromBigDecimal(value));
   }
 
-  get tokenAmount(): BigInt {
+  get tokenAmount(): BigDecimal {
     let value = this.get("tokenAmount");
-    return value.toBigInt();
+    return value.toBigDecimal();
   }
 
-  set tokenAmount(value: BigInt) {
-    this.set("tokenAmount", Value.fromBigInt(value));
+  set tokenAmount(value: BigDecimal) {
+    this.set("tokenAmount", Value.fromBigDecimal(value));
   }
 
-  get curated(): boolean {
-    let value = this.get("curated");
-    return value.toBoolean();
-  }
-
-  set curated(value: boolean) {
-    this.set("curated", Value.fromBoolean(value));
-  }
-
-  get fees(): BigInt {
+  get fees(): BigDecimal {
     let value = this.get("fees");
-    return value.toBigInt();
+    return value.toBigDecimal();
   }
 
-  set fees(value: BigInt) {
-    this.set("fees", Value.fromBigInt(value));
+  set fees(value: BigDecimal) {
+    this.set("fees", Value.fromBigDecimal(value));
   }
 
-  get liqAdd(): Array<string> {
-    let value = this.get("liqAdd");
+  get liqAdds(): Array<string> {
+    let value = this.get("liqAdds");
     return value.toStringArray();
   }
 
-  set liqAdd(value: Array<string>) {
-    this.set("liqAdd", Value.fromStringArray(value));
+  set liqAdds(value: Array<string>) {
+    this.set("liqAdds", Value.fromStringArray(value));
   }
 
-  get liqRemove(): Array<string> {
-    let value = this.get("liqRemove");
+  get liqRemoves(): Array<string> {
+    let value = this.get("liqRemoves");
     return value.toStringArray();
   }
 
-  set liqRemove(value: Array<string>) {
-    this.set("liqRemove", Value.fromStringArray(value));
+  set liqRemoves(value: Array<string>) {
+    this.set("liqRemoves", Value.fromStringArray(value));
   }
 
-  get swap(): Array<string> {
-    let value = this.get("swap");
+  get swaps(): Array<string> {
+    let value = this.get("swaps");
     return value.toStringArray();
   }
 
-  set swap(value: Array<string>) {
-    this.set("swap", Value.fromStringArray(value));
+  set swaps(value: Array<string>) {
+    this.set("swaps", Value.fromStringArray(value));
   }
 
-  get mintSynth(): Array<string> {
-    let value = this.get("mintSynth");
+  get mintSynths(): Array<string> {
+    let value = this.get("mintSynths");
     return value.toStringArray();
   }
 
-  set mintSynth(value: Array<string>) {
-    this.set("mintSynth", Value.fromStringArray(value));
+  set mintSynths(value: Array<string>) {
+    this.set("mintSynths", Value.fromStringArray(value));
   }
 
-  get burnSynth(): Array<string> {
-    let value = this.get("burnSynth");
+  get burnSynths(): Array<string> {
+    let value = this.get("burnSynths");
     return value.toStringArray();
   }
 
-  set burnSynth(value: Array<string>) {
-    this.set("burnSynth", Value.fromStringArray(value));
+  set burnSynths(value: Array<string>) {
+    this.set("burnSynths", Value.fromStringArray(value));
   }
 
   get stablecoin(): boolean {
@@ -318,6 +282,118 @@ export class Pool extends Entity {
 
   set stablecoin(value: boolean) {
     this.set("stablecoin", Value.fromBoolean(value));
+  }
+}
+
+export class Transaction extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Transaction entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Transaction entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Transaction", id.toString(), this);
+  }
+
+  static load(id: string): Transaction | null {
+    return store.get("Transaction", id) as Transaction | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get blockNumber(): BigInt {
+    let value = this.get("blockNumber");
+    return value.toBigInt();
+  }
+
+  set blockNumber(value: BigInt) {
+    this.set("blockNumber", Value.fromBigInt(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get gasUsed(): BigInt {
+    let value = this.get("gasUsed");
+    return value.toBigInt();
+  }
+
+  set gasUsed(value: BigInt) {
+    this.set("gasUsed", Value.fromBigInt(value));
+  }
+
+  get gasPrice(): BigInt {
+    let value = this.get("gasPrice");
+    return value.toBigInt();
+  }
+
+  set gasPrice(value: BigInt) {
+    this.set("gasPrice", Value.fromBigInt(value));
+  }
+
+  get liqAdds(): Array<string | null> {
+    let value = this.get("liqAdds");
+    return value.toStringArray();
+  }
+
+  set liqAdds(value: Array<string | null>) {
+    this.set("liqAdds", Value.fromStringArray(value));
+  }
+
+  get liqRemoves(): Array<string | null> {
+    let value = this.get("liqRemoves");
+    return value.toStringArray();
+  }
+
+  set liqRemoves(value: Array<string | null>) {
+    this.set("liqRemoves", Value.fromStringArray(value));
+  }
+
+  get swaps(): Array<string | null> {
+    let value = this.get("swaps");
+    return value.toStringArray();
+  }
+
+  set swaps(value: Array<string | null>) {
+    this.set("swaps", Value.fromStringArray(value));
+  }
+
+  get mintSynths(): Array<string | null> {
+    let value = this.get("mintSynths");
+    return value.toStringArray();
+  }
+
+  set mintSynths(value: Array<string | null>) {
+    this.set("mintSynths", Value.fromStringArray(value));
+  }
+
+  get burnSynths(): Array<string | null> {
+    let value = this.get("burnSynths");
+    return value.toStringArray();
+  }
+
+  set burnSynths(value: Array<string | null>) {
+    this.set("burnSynths", Value.fromStringArray(value));
   }
 }
 
@@ -351,6 +427,15 @@ export class LiqAdd extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
   get logIndex(): BigInt | null {
     let value = this.get("logIndex");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -404,31 +489,22 @@ export class LiqAdd extends Entity {
     this.set("member", Value.fromBytes(value));
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
+  get origin(): Bytes {
+    let value = this.get("origin");
     return value.toBytes();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
   }
 
-  get recipient(): Bytes {
-    let value = this.get("recipient");
-    return value.toBytes();
+  get inputBase(): BigDecimal {
+    let value = this.get("inputBase");
+    return value.toBigDecimal();
   }
 
-  set recipient(value: Bytes) {
-    this.set("recipient", Value.fromBytes(value));
-  }
-
-  get contract(): Bytes {
-    let value = this.get("contract");
-    return value.toBytes();
-  }
-
-  set contract(value: Bytes) {
-    this.set("contract", Value.fromBytes(value));
+  set inputBase(value: BigDecimal) {
+    this.set("inputBase", Value.fromBigDecimal(value));
   }
 
   get inputToken(): BigDecimal {
@@ -440,31 +516,13 @@ export class LiqAdd extends Entity {
     this.set("inputToken", Value.fromBigDecimal(value));
   }
 
-  get inputSparta(): BigDecimal {
-    let value = this.get("inputSparta");
+  get unitsIssued(): BigDecimal {
+    let value = this.get("unitsIssued");
     return value.toBigDecimal();
   }
 
-  set inputSparta(value: BigDecimal) {
-    this.set("inputSparta", Value.fromBigDecimal(value));
-  }
-
-  get inputUSD(): BigDecimal {
-    let value = this.get("inputUSD");
-    return value.toBigDecimal();
-  }
-
-  set inputUSD(value: BigDecimal) {
-    this.set("inputUSD", Value.fromBigDecimal(value));
-  }
-
-  get mintedLPs(): BigDecimal {
-    let value = this.get("mintedLPs");
-    return value.toBigDecimal();
-  }
-
-  set mintedLPs(value: BigDecimal) {
-    this.set("mintedLPs", Value.fromBigDecimal(value));
+  set unitsIssued(value: BigDecimal) {
+    this.set("unitsIssued", Value.fromBigDecimal(value));
   }
 }
 
@@ -498,6 +556,15 @@ export class LiqRemove extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
   get logIndex(): BigInt | null {
     let value = this.get("logIndex");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -551,13 +618,13 @@ export class LiqRemove extends Entity {
     this.set("member", Value.fromBytes(value));
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
+  get origin(): Bytes {
+    let value = this.get("origin");
     return value.toBytes();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
   }
 
   get recipient(): Bytes {
@@ -645,6 +712,15 @@ export class Swap extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
   get logIndex(): BigInt | null {
     let value = this.get("logIndex");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -716,13 +792,13 @@ export class Swap extends Entity {
     this.set("member", Value.fromBytes(value));
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
+  get origin(): Bytes {
+    let value = this.get("origin");
     return value.toBytes();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
   }
 
   get recipient(): Bytes {
@@ -801,6 +877,15 @@ export class MintSynth extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
   get logIndex(): BigInt | null {
     let value = this.get("logIndex");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -854,13 +939,13 @@ export class MintSynth extends Entity {
     this.set("member", Value.fromBytes(value));
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
+  get origin(): Bytes {
+    let value = this.get("origin");
     return value.toBytes();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
   }
 
   get recipient(): Bytes {
@@ -939,6 +1024,15 @@ export class BurnSynth extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
   get logIndex(): BigInt | null {
     let value = this.get("logIndex");
     if (value === null || value.kind == ValueKind.NULL) {
@@ -992,13 +1086,13 @@ export class BurnSynth extends Entity {
     this.set("member", Value.fromBytes(value));
   }
 
-  get sender(): Bytes {
-    let value = this.get("sender");
+  get origin(): Bytes {
+    let value = this.get("origin");
     return value.toBytes();
   }
 
-  set sender(value: Bytes) {
-    this.set("sender", Value.fromBytes(value));
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
   }
 
   get recipient(): Bytes {

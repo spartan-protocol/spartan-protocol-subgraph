@@ -1,9 +1,7 @@
 type PoolFactory @entity {
   id: ID! # PoolFactory contract address
-  curatedPoolSize: BigInt! # Max curated pool count
   poolCount: BigInt! # Listed pools count
   tokenCount: BigInt! # Listed tokens count
-  curatedCount: BigInt! # Curated pools count
 }
 
 type Token @entity {
@@ -11,7 +9,6 @@ type Token @entity {
   symbol: String!
   name: String!
   decimals: BigInt!
-  totalSupply: BigInt!
 }
 
 type Pool @entity {
@@ -21,43 +18,54 @@ type Pool @entity {
   symbol: String!
   name: String!
   decimals: BigInt!
-  totalSupply: BigInt!
-  baseAmount: BigInt! # SPARTA balance
-  tokenAmount: BigInt! # TOKEN balance
-  curated: Boolean! # Pool's curated status
-  fees: BigInt! # Slip fees paid into the pool
-  liqAdd: [LiqAdd!]! @derivedFrom(field: "pool")
-  liqRemove: [LiqRemove!]! @derivedFrom(field: "pool")
-  swap: [Swap!]! @derivedFrom(field: "pool")
-  mintSynth: [MintSynth!]! @derivedFrom(field: "pool")
-  burnSynth: [BurnSynth!]! @derivedFrom(field: "pool")
+  totalSupply: BigDecimal!
+  baseAmount: BigDecimal! # SPARTA balance
+  tokenAmount: BigDecimal! # TOKEN balance
+  fees: BigDecimal! # Slip fees paid into the pool
+  liqAdds: [LiqAdd!]! @derivedFrom(field: "pool")
+  liqRemoves: [LiqRemove!]! @derivedFrom(field: "pool")
+  swaps: [Swap!]! @derivedFrom(field: "pool")
+  mintSynths: [MintSynth!]! @derivedFrom(field: "pool")
+  burnSynths: [BurnSynth!]! @derivedFrom(field: "pool")
   stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
+}
+
+type Transaction @entity {
+  id: ID! # txn hash
+  blockNumber: BigInt! # block txn was included in
+  timestamp: BigInt! # timestamp txn was confirmed
+  gasUsed: BigInt! # gas used during txn execution
+  gasPrice: BigInt!
+  liqAdds: [LiqAdd]! @derivedFrom(field: "transaction")
+  liqRemoves: [LiqRemove]! @derivedFrom(field: "transaction")
+  swaps: [Swap]! @derivedFrom(field: "transaction")
+  mintSynths: [MintSynth]! @derivedFrom(field: "transaction")
+  burnSynths: [BurnSynth]! @derivedFrom(field: "transaction")
 }
 
 type LiqAdd @entity {
   id: ID! # TxnHash + logIndex
+  transaction: Transaction!
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
   member: Bytes!
-  sender: Bytes!
-  recipient: Bytes!
-  contract: Bytes! # Contract address calling the event
+  origin: Bytes!
+  inputBase: BigDecimal!
   inputToken: BigDecimal!
-  inputSparta: BigDecimal!
-  inputUSD: BigDecimal!
-  mintedLPs: BigDecimal!
+  unitsIssued: BigDecimal!
 }
 
 type LiqRemove @entity {
   id: ID! # TxnHash + logIndex
+  transaction: Transaction!
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
   member: Bytes!
-  sender: Bytes!
+  origin: Bytes!
   recipient: Bytes!
   contract: Bytes! # Contract address calling the event
   burnedLPs: BigDecimal!
@@ -68,6 +76,7 @@ type LiqRemove @entity {
 
 type Swap @entity {
   id: ID! # TxnHash + logIndex
+  transaction: Transaction!
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
@@ -75,7 +84,7 @@ type Swap @entity {
   toToken: Token!
   token: Token!
   member: Bytes!
-  sender: Bytes!
+  origin: Bytes!
   recipient: Bytes!
   contract: Bytes! # Contract address calling the event
   fromAmount: BigDecimal!
@@ -85,12 +94,13 @@ type Swap @entity {
 
 type MintSynth @entity {
   id: ID! # TxnHash + logIndex
+  transaction: Transaction!
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
   member: Bytes!
-  sender: Bytes!
+  origin: Bytes!
   recipient: Bytes!
   contract: Bytes! # Contract address calling the event
   inputSparta: BigDecimal!
@@ -100,12 +110,13 @@ type MintSynth @entity {
 
 type BurnSynth @entity {
   id: ID! # TxnHash + logIndex
+  transaction: Transaction!
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
   member: Bytes!
-  sender: Bytes!
+  origin: Bytes!
   recipient: Bytes!
   contract: Bytes! # Contract address calling the event
   burnedSynths: BigDecimal!
