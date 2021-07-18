@@ -20,6 +20,7 @@ export const addr_synthVault = '0x30cdea06826836145c9203b1d4d54e321cc32b1f' // 9
 export const addr_utils = '0x1c7437c145bd0bb7ee0dcfd30434173893596ee1' // f2bb6131c8ae2c8242c9f72a4d49cdf29bf19771
 
 export let stableCoins: string[] = [
+  // ADD ALL POSSIBLE FUTURE STABLECOINS HERE
   "0xed24fc36d5ee211ea25a80239fb8c4cfd80f12ee", // BUSD TESTNET
   "0xec5dcb5dbf4b114c9d0f65bccab49ec54f6a0867", // DAI TESTNET
 ]

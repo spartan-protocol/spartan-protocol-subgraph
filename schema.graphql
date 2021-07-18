@@ -2,6 +2,9 @@ type PoolFactory @entity {
   id: ID! # PoolFactory contract address
   poolCount: BigInt! # Listed pools count
   tokenCount: BigInt! # Listed tokens count
+  spartaDerivedUSD: BigDecimal!
+  tvlSPARTA: BigDecimal!
+  tvlUSD: BigDecimal!
 }
 
 type Token @entity {
@@ -9,6 +12,7 @@ type Token @entity {
   symbol: String!
   name: String!
   decimals: BigInt!
+  pool: Pool! # Pool contract address
 }
 
 type Pool @entity {
@@ -22,12 +26,28 @@ type Pool @entity {
   baseAmount: BigDecimal! # SPARTA balance
   tokenAmount: BigDecimal! # TOKEN balance
   fees: BigDecimal! # Slip fees paid into the pool
+  feesUSD: BigDecimal!
+  stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
+  tvlSPARTA: BigDecimal!
+  tvlUSD: BigDecimal!
   liqAdds: [LiqAdd!]! @derivedFrom(field: "pool")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "pool")
   swaps: [Swap!]! @derivedFrom(field: "pool")
   mintSynths: [MintSynth!]! @derivedFrom(field: "pool")
   burnSynths: [BurnSynth!]! @derivedFrom(field: "pool")
-  stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
+}
+
+type Member @entity {
+  # Add in a running NET sum of add/removes etc to get a position without having to call any arrays (USD/SPARTA/etc)
+  id: ID! # Member's wallet address
+  fees: BigDecimal! # Slip fees paid into the pools
+  liqNetSparta: BigDecimal!
+  liqNetUSD: BigDecimal!
+  liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
+  liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
+  swaps: [Swap!]! @derivedFrom(field: "member")
+  mintSynths: [MintSynth!]! @derivedFrom(field: "member")
+  burnSynths: [BurnSynth!]! @derivedFrom(field: "member")
 }
 
 type Transaction @entity {
@@ -50,11 +70,13 @@ type LiqAdd @entity {
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
-  member: Bytes!
+  member: Member!
   origin: Bytes!
   inputBase: BigDecimal!
   inputToken: BigDecimal!
   unitsIssued: BigDecimal!
+  derivedSparta: BigDecimal!
+  derivedUSD: BigDecimal!
 }
 
 type LiqRemove @entity {
@@ -64,14 +86,13 @@ type LiqRemove @entity {
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
-  member: Bytes!
+  member: Member!
   origin: Bytes!
-  recipient: Bytes!
-  contract: Bytes! # Contract address calling the event
-  burnedLPs: BigDecimal!
-  outputSparta: BigDecimal!
+  inputLPs: BigDecimal!
   outputToken: BigDecimal!
-  outputUSD: BigDecimal!
+  outputSparta: BigDecimal!
+  derivedSparta: BigDecimal!
+  derivedUSD: BigDecimal!
 }
 
 type Swap @entity {
@@ -80,16 +101,14 @@ type Swap @entity {
   logIndex: BigInt
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
-  fromToken: Token!
-  toToken: Token!
   token: Token!
-  member: Bytes!
+  member: Member!
   origin: Bytes!
-  recipient: Bytes!
-  contract: Bytes! # Contract address calling the event
-  fromAmount: BigDecimal!
-  toAmount: BigDecimal!
-  amountUSD: BigDecimal!
+  fromSparta: Boolean!
+  input: BigDecimal!
+  output: BigDecimal!
+  derivedSparta: BigDecimal!
+  derivedUSD: BigDecimal!
 }
 
 type MintSynth @entity {
@@ -99,13 +118,11 @@ type MintSynth @entity {
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
-  member: Bytes!
+  member: Member!
   origin: Bytes!
-  recipient: Bytes!
-  contract: Bytes! # Contract address calling the event
   inputSparta: BigDecimal!
-  inputUSD: BigDecimal!
   mintedSynths: BigDecimal!
+  derivedUSD: BigDecimal!
 }
 
 type BurnSynth @entity {
@@ -115,20 +132,17 @@ type BurnSynth @entity {
   timestamp: BigInt! # timestamp of transaction
   pool: Pool!
   token: Token!
-  member: Bytes!
+  member: Member!
   origin: Bytes!
-  recipient: Bytes!
-  contract: Bytes! # Contract address calling the event
-  burnedSynths: BigDecimal!
   outputSparta: BigDecimal!
-  outputUSD: BigDecimal!
+  burnedSynths: BigDecimal!
+  derivedUSD: BigDecimal!
 }
 
 type MetricsGlobalDay @entity {
   id: ID! # Timestamp
-  date: Int! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
+  timestamp: BigInt! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
   volSPARTA: BigDecimal! # Daily volume in SPARTA
-  volBNB: BigDecimal! # Daily volume in BNB
   volUSD: BigDecimal! # Daily volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
@@ -139,10 +153,9 @@ type MetricsGlobalDay @entity {
 
 type MetricsPoolDay @entity {
   id: ID! # Pool address + Timestamp
-  date: Int! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
+  timestamp: BigInt! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
   pool: Pool!
   volSPARTA: BigDecimal! # Daily volume in SPARTA
-  volBNB: BigDecimal! # Daily volume in BNB
   volUSD: BigDecimal! # Daily volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)

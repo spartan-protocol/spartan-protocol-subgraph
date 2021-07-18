@@ -12,6 +12,9 @@ export function handleCreatePool(event: CreatePool): void {
     poolFactory = new PoolFactory(addr_poolFactory);
     poolFactory.poolCount = ZERO_BI;
     poolFactory.tokenCount = ZERO_BI;
+    poolFactory.spartaDerivedUSD = ZERO_BD;
+    poolFactory.tvlSPARTA = ZERO_BD;
+    poolFactory.tvlUSD = ZERO_BD;
   }
   // Load/create token
   let token = Token.load(event.params.token.toHexString());
@@ -26,6 +29,7 @@ export function handleCreatePool(event: CreatePool): void {
       token.name = fetchTokenName(event.params.token);
       token.decimals = fetchTokenDecimals(event.params.token);
     }
+    token.pool = event.params.pool.toHexString();
     poolFactory.tokenCount = poolFactory.tokenCount.plus(ONE_BI)
   }
   // Load/create Pool
@@ -42,7 +46,10 @@ export function handleCreatePool(event: CreatePool): void {
     pool.tokenAmount = ZERO_BD;
     // pool.curated = false;
     pool.fees = ZERO_BD;
+    pool.feesUSD = ZERO_BD;
     pool.stablecoin = stableCoins.includes(token.id);
+    pool.tvlSPARTA = ZERO_BD;
+    pool.tvlUSD = ZERO_BD;
     poolFactory.poolCount = poolFactory.poolCount.plus(ONE_BI)
   }
 

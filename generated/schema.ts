@@ -59,6 +59,33 @@ export class PoolFactory extends Entity {
   set tokenCount(value: BigInt) {
     this.set("tokenCount", Value.fromBigInt(value));
   }
+
+  get spartaDerivedUSD(): BigDecimal {
+    let value = this.get("spartaDerivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set spartaDerivedUSD(value: BigDecimal) {
+    this.set("spartaDerivedUSD", Value.fromBigDecimal(value));
+  }
+
+  get tvlSPARTA(): BigDecimal {
+    let value = this.get("tvlSPARTA");
+    return value.toBigDecimal();
+  }
+
+  set tvlSPARTA(value: BigDecimal) {
+    this.set("tvlSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get tvlUSD(): BigDecimal {
+    let value = this.get("tvlUSD");
+    return value.toBigDecimal();
+  }
+
+  set tvlUSD(value: BigDecimal) {
+    this.set("tvlUSD", Value.fromBigDecimal(value));
+  }
 }
 
 export class Token extends Entity {
@@ -116,6 +143,15 @@ export class Token extends Entity {
 
   set decimals(value: BigInt) {
     this.set("decimals", Value.fromBigInt(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
   }
 }
 
@@ -230,6 +266,42 @@ export class Pool extends Entity {
     this.set("fees", Value.fromBigDecimal(value));
   }
 
+  get feesUSD(): BigDecimal {
+    let value = this.get("feesUSD");
+    return value.toBigDecimal();
+  }
+
+  set feesUSD(value: BigDecimal) {
+    this.set("feesUSD", Value.fromBigDecimal(value));
+  }
+
+  get stablecoin(): boolean {
+    let value = this.get("stablecoin");
+    return value.toBoolean();
+  }
+
+  set stablecoin(value: boolean) {
+    this.set("stablecoin", Value.fromBoolean(value));
+  }
+
+  get tvlSPARTA(): BigDecimal {
+    let value = this.get("tvlSPARTA");
+    return value.toBigDecimal();
+  }
+
+  set tvlSPARTA(value: BigDecimal) {
+    this.set("tvlSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get tvlUSD(): BigDecimal {
+    let value = this.get("tvlUSD");
+    return value.toBigDecimal();
+  }
+
+  set tvlUSD(value: BigDecimal) {
+    this.set("tvlUSD", Value.fromBigDecimal(value));
+  }
+
   get liqAdds(): Array<string> {
     let value = this.get("liqAdds");
     return value.toStringArray();
@@ -274,14 +346,108 @@ export class Pool extends Entity {
   set burnSynths(value: Array<string>) {
     this.set("burnSynths", Value.fromStringArray(value));
   }
+}
 
-  get stablecoin(): boolean {
-    let value = this.get("stablecoin");
-    return value.toBoolean();
+export class Member extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
   }
 
-  set stablecoin(value: boolean) {
-    this.set("stablecoin", Value.fromBoolean(value));
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Member entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Member entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Member", id.toString(), this);
+  }
+
+  static load(id: string): Member | null {
+    return store.get("Member", id) as Member | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get fees(): BigDecimal {
+    let value = this.get("fees");
+    return value.toBigDecimal();
+  }
+
+  set fees(value: BigDecimal) {
+    this.set("fees", Value.fromBigDecimal(value));
+  }
+
+  get liqNetSparta(): BigDecimal {
+    let value = this.get("liqNetSparta");
+    return value.toBigDecimal();
+  }
+
+  set liqNetSparta(value: BigDecimal) {
+    this.set("liqNetSparta", Value.fromBigDecimal(value));
+  }
+
+  get liqNetUSD(): BigDecimal {
+    let value = this.get("liqNetUSD");
+    return value.toBigDecimal();
+  }
+
+  set liqNetUSD(value: BigDecimal) {
+    this.set("liqNetUSD", Value.fromBigDecimal(value));
+  }
+
+  get liqAdds(): Array<string> {
+    let value = this.get("liqAdds");
+    return value.toStringArray();
+  }
+
+  set liqAdds(value: Array<string>) {
+    this.set("liqAdds", Value.fromStringArray(value));
+  }
+
+  get liqRemoves(): Array<string> {
+    let value = this.get("liqRemoves");
+    return value.toStringArray();
+  }
+
+  set liqRemoves(value: Array<string>) {
+    this.set("liqRemoves", Value.fromStringArray(value));
+  }
+
+  get swaps(): Array<string> {
+    let value = this.get("swaps");
+    return value.toStringArray();
+  }
+
+  set swaps(value: Array<string>) {
+    this.set("swaps", Value.fromStringArray(value));
+  }
+
+  get mintSynths(): Array<string> {
+    let value = this.get("mintSynths");
+    return value.toStringArray();
+  }
+
+  set mintSynths(value: Array<string>) {
+    this.set("mintSynths", Value.fromStringArray(value));
+  }
+
+  get burnSynths(): Array<string> {
+    let value = this.get("burnSynths");
+    return value.toStringArray();
+  }
+
+  set burnSynths(value: Array<string>) {
+    this.set("burnSynths", Value.fromStringArray(value));
   }
 }
 
@@ -480,13 +646,13 @@ export class LiqAdd extends Entity {
     this.set("token", Value.fromString(value));
   }
 
-  get member(): Bytes {
+  get member(): string {
     let value = this.get("member");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set member(value: Bytes) {
-    this.set("member", Value.fromBytes(value));
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
   }
 
   get origin(): Bytes {
@@ -523,6 +689,24 @@ export class LiqAdd extends Entity {
 
   set unitsIssued(value: BigDecimal) {
     this.set("unitsIssued", Value.fromBigDecimal(value));
+  }
+
+  get derivedSparta(): BigDecimal {
+    let value = this.get("derivedSparta");
+    return value.toBigDecimal();
+  }
+
+  set derivedSparta(value: BigDecimal) {
+    this.set("derivedSparta", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
   }
 }
 
@@ -609,13 +793,13 @@ export class LiqRemove extends Entity {
     this.set("token", Value.fromString(value));
   }
 
-  get member(): Bytes {
+  get member(): string {
     let value = this.get("member");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set member(value: Bytes) {
-    this.set("member", Value.fromBytes(value));
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
   }
 
   get origin(): Bytes {
@@ -627,40 +811,13 @@ export class LiqRemove extends Entity {
     this.set("origin", Value.fromBytes(value));
   }
 
-  get recipient(): Bytes {
-    let value = this.get("recipient");
-    return value.toBytes();
-  }
-
-  set recipient(value: Bytes) {
-    this.set("recipient", Value.fromBytes(value));
-  }
-
-  get contract(): Bytes {
-    let value = this.get("contract");
-    return value.toBytes();
-  }
-
-  set contract(value: Bytes) {
-    this.set("contract", Value.fromBytes(value));
-  }
-
-  get burnedLPs(): BigDecimal {
-    let value = this.get("burnedLPs");
+  get inputLPs(): BigDecimal {
+    let value = this.get("inputLPs");
     return value.toBigDecimal();
   }
 
-  set burnedLPs(value: BigDecimal) {
-    this.set("burnedLPs", Value.fromBigDecimal(value));
-  }
-
-  get outputSparta(): BigDecimal {
-    let value = this.get("outputSparta");
-    return value.toBigDecimal();
-  }
-
-  set outputSparta(value: BigDecimal) {
-    this.set("outputSparta", Value.fromBigDecimal(value));
+  set inputLPs(value: BigDecimal) {
+    this.set("inputLPs", Value.fromBigDecimal(value));
   }
 
   get outputToken(): BigDecimal {
@@ -672,13 +829,31 @@ export class LiqRemove extends Entity {
     this.set("outputToken", Value.fromBigDecimal(value));
   }
 
-  get outputUSD(): BigDecimal {
-    let value = this.get("outputUSD");
+  get outputSparta(): BigDecimal {
+    let value = this.get("outputSparta");
     return value.toBigDecimal();
   }
 
-  set outputUSD(value: BigDecimal) {
-    this.set("outputUSD", Value.fromBigDecimal(value));
+  set outputSparta(value: BigDecimal) {
+    this.set("outputSparta", Value.fromBigDecimal(value));
+  }
+
+  get derivedSparta(): BigDecimal {
+    let value = this.get("derivedSparta");
+    return value.toBigDecimal();
+  }
+
+  set derivedSparta(value: BigDecimal) {
+    this.set("derivedSparta", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
   }
 }
 
@@ -756,24 +931,6 @@ export class Swap extends Entity {
     this.set("pool", Value.fromString(value));
   }
 
-  get fromToken(): string {
-    let value = this.get("fromToken");
-    return value.toString();
-  }
-
-  set fromToken(value: string) {
-    this.set("fromToken", Value.fromString(value));
-  }
-
-  get toToken(): string {
-    let value = this.get("toToken");
-    return value.toString();
-  }
-
-  set toToken(value: string) {
-    this.set("toToken", Value.fromString(value));
-  }
-
   get token(): string {
     let value = this.get("token");
     return value.toString();
@@ -783,13 +940,13 @@ export class Swap extends Entity {
     this.set("token", Value.fromString(value));
   }
 
-  get member(): Bytes {
+  get member(): string {
     let value = this.get("member");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set member(value: Bytes) {
-    this.set("member", Value.fromBytes(value));
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
   }
 
   get origin(): Bytes {
@@ -801,49 +958,49 @@ export class Swap extends Entity {
     this.set("origin", Value.fromBytes(value));
   }
 
-  get recipient(): Bytes {
-    let value = this.get("recipient");
-    return value.toBytes();
+  get fromSparta(): boolean {
+    let value = this.get("fromSparta");
+    return value.toBoolean();
   }
 
-  set recipient(value: Bytes) {
-    this.set("recipient", Value.fromBytes(value));
+  set fromSparta(value: boolean) {
+    this.set("fromSparta", Value.fromBoolean(value));
   }
 
-  get contract(): Bytes {
-    let value = this.get("contract");
-    return value.toBytes();
-  }
-
-  set contract(value: Bytes) {
-    this.set("contract", Value.fromBytes(value));
-  }
-
-  get fromAmount(): BigDecimal {
-    let value = this.get("fromAmount");
+  get input(): BigDecimal {
+    let value = this.get("input");
     return value.toBigDecimal();
   }
 
-  set fromAmount(value: BigDecimal) {
-    this.set("fromAmount", Value.fromBigDecimal(value));
+  set input(value: BigDecimal) {
+    this.set("input", Value.fromBigDecimal(value));
   }
 
-  get toAmount(): BigDecimal {
-    let value = this.get("toAmount");
+  get output(): BigDecimal {
+    let value = this.get("output");
     return value.toBigDecimal();
   }
 
-  set toAmount(value: BigDecimal) {
-    this.set("toAmount", Value.fromBigDecimal(value));
+  set output(value: BigDecimal) {
+    this.set("output", Value.fromBigDecimal(value));
   }
 
-  get amountUSD(): BigDecimal {
-    let value = this.get("amountUSD");
+  get derivedSparta(): BigDecimal {
+    let value = this.get("derivedSparta");
     return value.toBigDecimal();
   }
 
-  set amountUSD(value: BigDecimal) {
-    this.set("amountUSD", Value.fromBigDecimal(value));
+  set derivedSparta(value: BigDecimal) {
+    this.set("derivedSparta", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
   }
 }
 
@@ -930,13 +1087,13 @@ export class MintSynth extends Entity {
     this.set("token", Value.fromString(value));
   }
 
-  get member(): Bytes {
+  get member(): string {
     let value = this.get("member");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set member(value: Bytes) {
-    this.set("member", Value.fromBytes(value));
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
   }
 
   get origin(): Bytes {
@@ -948,24 +1105,6 @@ export class MintSynth extends Entity {
     this.set("origin", Value.fromBytes(value));
   }
 
-  get recipient(): Bytes {
-    let value = this.get("recipient");
-    return value.toBytes();
-  }
-
-  set recipient(value: Bytes) {
-    this.set("recipient", Value.fromBytes(value));
-  }
-
-  get contract(): Bytes {
-    let value = this.get("contract");
-    return value.toBytes();
-  }
-
-  set contract(value: Bytes) {
-    this.set("contract", Value.fromBytes(value));
-  }
-
   get inputSparta(): BigDecimal {
     let value = this.get("inputSparta");
     return value.toBigDecimal();
@@ -975,15 +1114,6 @@ export class MintSynth extends Entity {
     this.set("inputSparta", Value.fromBigDecimal(value));
   }
 
-  get inputUSD(): BigDecimal {
-    let value = this.get("inputUSD");
-    return value.toBigDecimal();
-  }
-
-  set inputUSD(value: BigDecimal) {
-    this.set("inputUSD", Value.fromBigDecimal(value));
-  }
-
   get mintedSynths(): BigDecimal {
     let value = this.get("mintedSynths");
     return value.toBigDecimal();
@@ -991,6 +1121,15 @@ export class MintSynth extends Entity {
 
   set mintedSynths(value: BigDecimal) {
     this.set("mintedSynths", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
   }
 }
 
@@ -1077,13 +1216,13 @@ export class BurnSynth extends Entity {
     this.set("token", Value.fromString(value));
   }
 
-  get member(): Bytes {
+  get member(): string {
     let value = this.get("member");
-    return value.toBytes();
+    return value.toString();
   }
 
-  set member(value: Bytes) {
-    this.set("member", Value.fromBytes(value));
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
   }
 
   get origin(): Bytes {
@@ -1095,22 +1234,13 @@ export class BurnSynth extends Entity {
     this.set("origin", Value.fromBytes(value));
   }
 
-  get recipient(): Bytes {
-    let value = this.get("recipient");
-    return value.toBytes();
+  get outputSparta(): BigDecimal {
+    let value = this.get("outputSparta");
+    return value.toBigDecimal();
   }
 
-  set recipient(value: Bytes) {
-    this.set("recipient", Value.fromBytes(value));
-  }
-
-  get contract(): Bytes {
-    let value = this.get("contract");
-    return value.toBytes();
-  }
-
-  set contract(value: Bytes) {
-    this.set("contract", Value.fromBytes(value));
+  set outputSparta(value: BigDecimal) {
+    this.set("outputSparta", Value.fromBigDecimal(value));
   }
 
   get burnedSynths(): BigDecimal {
@@ -1122,22 +1252,13 @@ export class BurnSynth extends Entity {
     this.set("burnedSynths", Value.fromBigDecimal(value));
   }
 
-  get outputSparta(): BigDecimal {
-    let value = this.get("outputSparta");
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
     return value.toBigDecimal();
   }
 
-  set outputSparta(value: BigDecimal) {
-    this.set("outputSparta", Value.fromBigDecimal(value));
-  }
-
-  get outputUSD(): BigDecimal {
-    let value = this.get("outputUSD");
-    return value.toBigDecimal();
-  }
-
-  set outputUSD(value: BigDecimal) {
-    this.set("outputUSD", Value.fromBigDecimal(value));
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
   }
 }
 
@@ -1171,13 +1292,13 @@ export class MetricsGlobalDay extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get date(): i32 {
-    let value = this.get("date");
-    return value.toI32();
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
   }
 
-  set date(value: i32) {
-    this.set("date", Value.fromI32(value));
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
   }
 
   get volSPARTA(): BigDecimal {
@@ -1187,15 +1308,6 @@ export class MetricsGlobalDay extends Entity {
 
   set volSPARTA(value: BigDecimal) {
     this.set("volSPARTA", Value.fromBigDecimal(value));
-  }
-
-  get volBNB(): BigDecimal {
-    let value = this.get("volBNB");
-    return value.toBigDecimal();
-  }
-
-  set volBNB(value: BigDecimal) {
-    this.set("volBNB", Value.fromBigDecimal(value));
   }
 
   get volUSD(): BigDecimal {
@@ -1283,13 +1395,13 @@ export class MetricsPoolDay extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get date(): i32 {
-    let value = this.get("date");
-    return value.toI32();
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
   }
 
-  set date(value: i32) {
-    this.set("date", Value.fromI32(value));
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
   }
 
   get pool(): string {
@@ -1308,15 +1420,6 @@ export class MetricsPoolDay extends Entity {
 
   set volSPARTA(value: BigDecimal) {
     this.set("volSPARTA", Value.fromBigDecimal(value));
-  }
-
-  get volBNB(): BigDecimal {
-    let value = this.get("volBNB");
-    return value.toBigDecimal();
-  }
-
-  set volBNB(value: BigDecimal) {
-    this.set("volBNB", Value.fromBigDecimal(value));
   }
 
   get volUSD(): BigDecimal {
