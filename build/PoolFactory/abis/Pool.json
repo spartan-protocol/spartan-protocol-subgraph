@@ -25,6 +25,12 @@
         "type": "address"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "inputBase",
@@ -83,7 +89,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "base",
+        "name": "synthAddress",
         "type": "address"
       },
       {
@@ -93,10 +99,10 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liqUnits",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -120,7 +126,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "base",
+        "name": "synthAddress",
         "type": "address"
       },
       {
@@ -130,10 +136,10 @@
         "type": "uint256"
       },
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "liqUnits",
+        "type": "uint256"
       },
       {
         "indexed": false,
@@ -152,6 +158,12 @@
         "indexed": true,
         "internalType": "address",
         "name": "member",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "tokenAddress",
         "type": "address"
       },
       {
@@ -258,8 +270,21 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newRTC",
+        "type": "uint256"
+      }
+    ],
+    "name": "RTC",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
-    "name": "DEPLOYER",
+    "name": "SYNTH",
     "outputs": [
       {
         "internalType": "address",
@@ -281,19 +306,6 @@
       }
     ],
     "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "add",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "liquidityUnits",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -367,35 +379,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "approveAndCall",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
         "name": "account",
         "type": "address"
       }
@@ -425,6 +408,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "baseCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -441,30 +437,12 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "account",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "burnFrom",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "synthIN",
+        "name": "recipient",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "member",
+        "name": "actualMember",
         "type": "address"
       }
     ],
@@ -523,6 +501,19 @@
   },
   {
     "inputs": [],
+    "name": "freeze",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "genesis",
     "outputs": [
       {
@@ -560,6 +551,19 @@
   },
   {
     "inputs": [],
+    "name": "lastStirred",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "map30DPoolRevenue",
     "outputs": [
       {
@@ -586,11 +590,6 @@
   },
   {
     "inputs": [
-      {
-        "internalType": "address",
-        "name": "synthOut",
-        "type": "address"
-      },
       {
         "internalType": "address",
         "name": "member",
@@ -628,27 +627,27 @@
   },
   {
     "inputs": [],
-    "name": "remove",
+    "name": "oldRate",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "outputBase",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "outputToken",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "member",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "actualMember",
         "type": "address"
       }
     ],
@@ -672,11 +671,50 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_newFreezePoint",
         "type": "uint256"
       }
     ],
-    "name": "revenueArray",
+    "name": "setFreezePoint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_synthCap",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSynthCap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "synth",
+        "type": "address"
+      }
+    ],
+    "name": "stirCauldron",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "steamedSynths",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stirRate",
     "outputs": [
       {
         "internalType": "uint256",
@@ -688,27 +726,16 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      }
-    ],
-    "name": "swap",
+    "inputs": [],
+    "name": "stirStamp",
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "outputAmount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "fee",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -737,7 +764,7 @@
         "type": "uint256"
       }
     ],
-    "stateMutability": "payable",
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -758,6 +785,19 @@
     "name": "sync",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "synthCap",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -800,35 +840,6 @@
       }
     ],
     "name": "transfer",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "recipient",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "transferAndCall",
     "outputs": [
       {
         "internalType": "bool",

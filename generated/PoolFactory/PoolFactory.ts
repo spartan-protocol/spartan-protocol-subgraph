@@ -26,10 +26,6 @@ export class AddCuratePool__Params {
   get pool(): Address {
     return this._event.parameters[0].value.toAddress();
   }
-
-  get Curated(): boolean {
-    return this._event.parameters[1].value.toBoolean();
-  }
 }
 
 export class CreatePool extends ethereum.Event {
@@ -70,10 +66,6 @@ export class RemoveCuratePool__Params {
   get pool(): Address {
     return this._event.parameters[0].value.toAddress();
   }
-
-  get Curated(): boolean {
-    return this._event.parameters[1].value.toBoolean();
-  }
 }
 
 export class PoolFactory extends ethereum.SmartContract {
@@ -81,163 +73,20 @@ export class PoolFactory extends ethereum.SmartContract {
     return new PoolFactory("PoolFactory", address);
   }
 
-  BASE(): Address {
-    let result = super.call("BASE", "BASE():(address)", []);
-
-    return result[0].toAddress();
-  }
-
-  try_BASE(): ethereum.CallResult<Address> {
-    let result = super.tryCall("BASE", "BASE():(address)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  DEPLOYER(): Address {
-    let result = super.call("DEPLOYER", "DEPLOYER():(address)", []);
-
-    return result[0].toAddress();
-  }
-
-  try_DEPLOYER(): ethereum.CallResult<Address> {
-    let result = super.tryCall("DEPLOYER", "DEPLOYER():(address)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  WBNB(): Address {
-    let result = super.call("WBNB", "WBNB():(address)", []);
-
-    return result[0].toAddress();
-  }
-
-  try_WBNB(): ethereum.CallResult<Address> {
-    let result = super.tryCall("WBNB", "WBNB():(address)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  arrayPools(param0: BigInt): Address {
-    let result = super.call("arrayPools", "arrayPools(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(param0)
-    ]);
-
-    return result[0].toAddress();
-  }
-
-  try_arrayPools(param0: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall("arrayPools", "arrayPools(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(param0)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  arrayTokens(param0: BigInt): Address {
-    let result = super.call("arrayTokens", "arrayTokens(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(param0)
-    ]);
-
-    return result[0].toAddress();
-  }
-
-  try_arrayTokens(param0: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "arrayTokens",
-      "arrayTokens(uint256):(address)",
-      [ethereum.Value.fromUnsignedBigInt(param0)]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  createPool(token: Address): Address {
-    let result = super.call("createPool", "createPool(address):(address)", [
-      ethereum.Value.fromAddress(token)
-    ]);
-
-    return result[0].toAddress();
-  }
-
-  try_createPool(token: Address): ethereum.CallResult<Address> {
-    let result = super.tryCall("createPool", "createPool(address):(address)", [
-      ethereum.Value.fromAddress(token)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  createPoolADD(
-    inputBase: BigInt,
-    inputToken: BigInt,
-    token: Address
-  ): Address {
+  curatedPoolCount(): BigInt {
     let result = super.call(
-      "createPoolADD",
-      "createPoolADD(uint256,uint256,address):(address)",
-      [
-        ethereum.Value.fromUnsignedBigInt(inputBase),
-        ethereum.Value.fromUnsignedBigInt(inputToken),
-        ethereum.Value.fromAddress(token)
-      ]
-    );
-
-    return result[0].toAddress();
-  }
-
-  try_createPoolADD(
-    inputBase: BigInt,
-    inputToken: BigInt,
-    token: Address
-  ): ethereum.CallResult<Address> {
-    let result = super.tryCall(
-      "createPoolADD",
-      "createPoolADD(uint256,uint256,address):(address)",
-      [
-        ethereum.Value.fromUnsignedBigInt(inputBase),
-        ethereum.Value.fromUnsignedBigInt(inputToken),
-        ethereum.Value.fromAddress(token)
-      ]
-    );
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
-  }
-
-  curatedPoolSize(): BigInt {
-    let result = super.call(
-      "curatedPoolSize",
-      "curatedPoolSize():(uint256)",
+      "curatedPoolCount",
+      "curatedPoolCount():(uint256)",
       []
     );
 
     return result[0].toBigInt();
   }
 
-  try_curatedPoolSize(): ethereum.CallResult<BigInt> {
+  try_curatedPoolCount(): ethereum.CallResult<BigInt> {
     let result = super.tryCall(
-      "curatedPoolSize",
-      "curatedPoolSize():(uint256)",
+      "curatedPoolCount",
+      "curatedPoolCount():(uint256)",
       []
     );
     if (result.reverted) {
@@ -266,44 +115,69 @@ export class PoolFactory extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
-  getPoolArray(i: BigInt): Address {
-    let result = super.call("getPoolArray", "getPoolArray(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(i)
-    ]);
+  getPoolAssets(): Array<Address> {
+    let result = super.call("getPoolAssets", "getPoolAssets():(address[])", []);
 
-    return result[0].toAddress();
+    return result[0].toAddressArray();
   }
 
-  try_getPoolArray(i: BigInt): ethereum.CallResult<Address> {
+  try_getPoolAssets(): ethereum.CallResult<Array<Address>> {
     let result = super.tryCall(
-      "getPoolArray",
-      "getPoolArray(uint256):(address)",
-      [ethereum.Value.fromUnsignedBigInt(i)]
+      "getPoolAssets",
+      "getPoolAssets():(address[])",
+      []
     );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
-  getToken(i: BigInt): Address {
-    let result = super.call("getToken", "getToken(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(i)
-    ]);
+  getTokenAssets(): Array<Address> {
+    let result = super.call(
+      "getTokenAssets",
+      "getTokenAssets():(address[])",
+      []
+    );
 
-    return result[0].toAddress();
+    return result[0].toAddressArray();
   }
 
-  try_getToken(i: BigInt): ethereum.CallResult<Address> {
-    let result = super.tryCall("getToken", "getToken(uint256):(address)", [
-      ethereum.Value.fromUnsignedBigInt(i)
-    ]);
+  try_getTokenAssets(): ethereum.CallResult<Array<Address>> {
+    let result = super.tryCall(
+      "getTokenAssets",
+      "getTokenAssets():(address[])",
+      []
+    );
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toAddress());
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
+  }
+
+  getVaultAssets(): Array<Address> {
+    let result = super.call(
+      "getVaultAssets",
+      "getVaultAssets():(address[])",
+      []
+    );
+
+    return result[0].toAddressArray();
+  }
+
+  try_getVaultAssets(): ethereum.CallResult<Array<Address>> {
+    let result = super.tryCall(
+      "getVaultAssets",
+      "getVaultAssets():(address[])",
+      []
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddressArray());
   }
 
   isCuratedPool(param0: Address): boolean {
@@ -327,72 +201,23 @@ export class PoolFactory extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBoolean());
   }
 
-  isListedPool(param0: Address): boolean {
-    let result = super.call("isListedPool", "isListedPool(address):(bool)", [
-      ethereum.Value.fromAddress(param0)
-    ]);
-
-    return result[0].toBoolean();
-  }
-
-  try_isListedPool(param0: Address): ethereum.CallResult<boolean> {
-    let result = super.tryCall("isListedPool", "isListedPool(address):(bool)", [
-      ethereum.Value.fromAddress(param0)
-    ]);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
-
-  isPool(pool: Address): boolean {
+  isPool(param0: Address): boolean {
     let result = super.call("isPool", "isPool(address):(bool)", [
-      ethereum.Value.fromAddress(pool)
+      ethereum.Value.fromAddress(param0)
     ]);
 
     return result[0].toBoolean();
   }
 
-  try_isPool(pool: Address): ethereum.CallResult<boolean> {
+  try_isPool(param0: Address): ethereum.CallResult<boolean> {
     let result = super.tryCall("isPool", "isPool(address):(bool)", [
-      ethereum.Value.fromAddress(pool)
+      ethereum.Value.fromAddress(param0)
     ]);
     if (result.reverted) {
       return new ethereum.CallResult();
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBoolean());
-  }
-
-  poolCount(): BigInt {
-    let result = super.call("poolCount", "poolCount():(uint256)", []);
-
-    return result[0].toBigInt();
-  }
-
-  try_poolCount(): ethereum.CallResult<BigInt> {
-    let result = super.tryCall("poolCount", "poolCount():(uint256)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
-  }
-
-  tokenCount(): BigInt {
-    let result = super.call("tokenCount", "tokenCount():(uint256)", []);
-
-    return result[0].toBigInt();
-  }
-
-  try_tokenCount(): ethereum.CallResult<BigInt> {
-    let result = super.tryCall("tokenCount", "tokenCount():(uint256)", []);
-    if (result.reverted) {
-      return new ethereum.CallResult();
-    }
-    let value = result.value;
-    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 }
 
@@ -457,40 +282,6 @@ export class AddCuratedPoolCall__Outputs {
 
   constructor(call: AddCuratedPoolCall) {
     this._call = call;
-  }
-}
-
-export class CreatePoolCall extends ethereum.Call {
-  get inputs(): CreatePoolCall__Inputs {
-    return new CreatePoolCall__Inputs(this);
-  }
-
-  get outputs(): CreatePoolCall__Outputs {
-    return new CreatePoolCall__Outputs(this);
-  }
-}
-
-export class CreatePoolCall__Inputs {
-  _call: CreatePoolCall;
-
-  constructor(call: CreatePoolCall) {
-    this._call = call;
-  }
-
-  get token(): Address {
-    return this._call.inputValues[0].value.toAddress();
-  }
-}
-
-export class CreatePoolCall__Outputs {
-  _call: CreatePoolCall;
-
-  constructor(call: CreatePoolCall) {
-    this._call = call;
-  }
-
-  get pool(): Address {
-    return this._call.outputValues[0].value.toAddress();
   }
 }
 
@@ -588,6 +379,40 @@ export class RemoveCuratedPoolCall__Outputs {
   _call: RemoveCuratedPoolCall;
 
   constructor(call: RemoveCuratedPoolCall) {
+    this._call = call;
+  }
+}
+
+export class SetParamsCall extends ethereum.Call {
+  get inputs(): SetParamsCall__Inputs {
+    return new SetParamsCall__Inputs(this);
+  }
+
+  get outputs(): SetParamsCall__Outputs {
+    return new SetParamsCall__Outputs(this);
+  }
+}
+
+export class SetParamsCall__Inputs {
+  _call: SetParamsCall;
+
+  constructor(call: SetParamsCall) {
+    this._call = call;
+  }
+
+  get newSize(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+
+  get _minBASE(): BigInt {
+    return this._call.inputValues[1].value.toBigInt();
+  }
+}
+
+export class SetParamsCall__Outputs {
+  _call: SetParamsCall;
+
+  constructor(call: SetParamsCall) {
     this._call = call;
   }
 }
