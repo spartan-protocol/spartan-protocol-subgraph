@@ -29,30 +29,8 @@ import {
 } from "./utils";
 
 export function handleAddLiquidity(event: AddLiquidity): void {
-  // MAKE SURE TO LOAD AND CHECK POOL BEFORE LIQUIDITY ADD
-  // IF POOL DOESNT EXIST; HAND TOKEN AND POOL ADDRESSES TO handleCreatePool()
-  // This is due to the fact that liquidity is added to a pool before the createPool event is emitted when using createPoolADD()
-  // After redeploy; remove that logic though; have moved the createPool event above the liqAdd for the next deploy
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
-  // Create Pool if non-existent
-  if (!pool) {
-    let tokenAddr = fetchTokenAddr(event.address);
-    pool = new Pool(poolAddress);
-    pool.token0 = tokenAddr.toHexString();
-    pool.genesis = event.block.timestamp;
-    pool.symbol = fetchTokenSymbol(tokenAddr) + "-SPP";
-    pool.name = fetchTokenName(tokenAddr) + "-SpartanProtocolPool";
-    pool.decimals = BigInt.fromI32(18);
-    pool.totalSupply = ZERO_BD;
-    pool.baseAmount = ZERO_BD;
-    pool.tokenAmount = ZERO_BD;
-    pool.fees = ZERO_BD;
-    pool.feesUSD = ZERO_BD;
-    pool.stablecoin = stableCoins.includes(tokenAddr.toHexString());
-    pool.tvlSPARTA = ZERO_BD;
-    pool.tvlUSD = ZERO_BD;
-  }
 
   let inputBase = event.params.inputBase.toBigDecimal();
   let inputToken = event.params.inputToken.toBigDecimal();

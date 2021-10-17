@@ -2,7 +2,14 @@ import { Address, BigInt } from "@graphprotocol/graph-ts";
 import { CreatePool } from "../generated/PoolFactory/PoolFactory";
 import { PoolFactory, Token, Pool } from "../generated/schema";
 import { Pool as PoolTemplate } from "../generated/templates";
-import { addr_bnb, addr_poolFactory, ONE_BI, stableCoins, ZERO_BD, ZERO_BI } from "./const";
+import {
+  addr_bnb,
+  addr_poolFactory,
+  ONE_BI,
+  stableCoins,
+  ZERO_BD,
+  ZERO_BI,
+} from "./const";
 import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol } from "./utils";
 
 export function handleCreatePool(event: CreatePool): void {
@@ -30,7 +37,7 @@ export function handleCreatePool(event: CreatePool): void {
       token.decimals = fetchTokenDecimals(event.params.token);
     }
     token.pool = event.params.pool.toHexString();
-    poolFactory.tokenCount = poolFactory.tokenCount.plus(ONE_BI)
+    poolFactory.tokenCount = poolFactory.tokenCount.plus(ONE_BI);
   }
   // Load/create Pool
   let pool = Pool.load(event.params.pool.toHexString());
@@ -50,7 +57,7 @@ export function handleCreatePool(event: CreatePool): void {
     pool.stablecoin = stableCoins.includes(token.id);
     pool.tvlSPARTA = ZERO_BD;
     pool.tvlUSD = ZERO_BD;
-    poolFactory.poolCount = poolFactory.poolCount.plus(ONE_BI)
+    poolFactory.poolCount = poolFactory.poolCount.plus(ONE_BI);
   }
 
   poolFactory.save();
