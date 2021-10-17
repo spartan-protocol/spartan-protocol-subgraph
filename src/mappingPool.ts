@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -64,7 +64,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 
   let member = Member.load(event.params.member.toHexString());
   member.liqNetSparta = member.liqNetSparta.minus(liqAdd.derivedSparta);
-  member.liqNetUSD = member.liqNetSparta.minus(liqAdd.derivedUSD);
+  member.liqNetUSD = member.liqNetUSD.minus(liqAdd.derivedUSD);
 
   liqAdd.save();
   member.save();
@@ -106,9 +106,10 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
   let member = Member.load(event.params.member.toHexString());
   member.liqNetSparta = member.liqNetSparta.plus(liqRemove.derivedSparta);
-  member.liqNetUSD = member.liqNetSparta.plus(liqRemove.derivedUSD);
+  member.liqNetUSD = member.liqNetUSD.plus(liqRemove.derivedUSD);
 
   pool.save();
+  sync(Address.fromString(poolAddress));
   updateSpartaPrice();
   liqRemove.save();
   member.save();
@@ -163,6 +164,7 @@ export function handleSwapped(event: Swapped): void {
   memberLoaded.fees = memberLoaded.fees.plus(fee);
 
   pool.save();
+  sync(Address.fromString(poolAddress));
   updateSpartaPrice();
   swap.save();
   memberLoaded.save();
@@ -177,11 +179,8 @@ export function handleSwapped(event: Swapped): void {
   );
 }
 
-// UNCOMMENT BELOW ONCE NEW POOL CONTRACT DEPLOYED WITH CHANGED EVENTS
-// DELETE SYNC() AS WELL!
 export function handleMintSynth(event: MintSynth): void {
   let poolAddress = event.address;
-  sync(poolAddress);
 
   // let poolFactory = PoolFactory.load(addr_poolFactory);
   // let poolAddress = event.address.toHexString();
@@ -226,11 +225,8 @@ export function handleMintSynth(event: MintSynth): void {
   // updateDayMetrics() // ADD IN THE ARGS
 }
 
-// UNCOMMENT BELOW ONCE NEW POOL CONTRACT DEPLOYED WITH CHANGED EVENTS
-// DELETE SYNC() AS WELL!
 export function handleBurnSynth(event: BurnSynth): void {
   let poolAddress = event.address;
-  sync(poolAddress);
 
   // let poolFactory = PoolFactory.load(addr_poolFactory);
   // let poolAddress = event.address.toHexString();

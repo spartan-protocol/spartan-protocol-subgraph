@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { CreatePool } from "../generated/PoolFactory/PoolFactory";
 import { PoolFactory, Token, Pool } from "../generated/schema";
 import { Pool as PoolTemplate } from "../generated/templates";
@@ -19,7 +19,7 @@ export function handleCreatePool(event: CreatePool): void {
     poolFactory = new PoolFactory(addr_poolFactory);
     poolFactory.poolCount = ZERO_BI;
     poolFactory.tokenCount = ZERO_BI;
-    poolFactory.spartaDerivedUSD = ZERO_BD;
+    poolFactory.spartaDerivedUSD = BigDecimal.fromString("600000000000000000");
     poolFactory.tvlSPARTA = ZERO_BD;
     poolFactory.tvlUSD = ZERO_BD;
   }

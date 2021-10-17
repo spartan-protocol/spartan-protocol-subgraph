@@ -134,7 +134,9 @@ export function updateSpartaPrice(): void {
   for (let i = 0; i < length; i++) {
     let pool = Pool.load(getPoolAddr(stableCoins[i]));
     if (pool) {
-      if (pool.baseAmount.gt(ZERO_BD)) {
+      if (
+        pool.baseAmount.gt(BigDecimal.fromString("100000000000000000000000"))
+      ) {
         spartaPrice = pool.tokenAmount.div(pool.baseAmount).plus(spartaPrice);
         avgCount = avgCount.plus(BigInt.fromI32(1));
       }
@@ -169,7 +171,7 @@ export function updateDayMetrics(
   feesUSD: BigDecimal
 ): void {
   // let dayStart = BigInt.fromI32(Math.floor(timestamp.toI32() / 86400) * 86400);
-  let dayStart = timestamp.mod(BigInt.fromString('86400'));
+  let dayStart = timestamp.mod(BigInt.fromString("86400"));
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
@@ -251,16 +253,17 @@ export function sync(poolAddr: Address): void {
   let pool = Pool.load(poolAddr.toHexString());
   let contract = PoolGen.bind(poolAddr);
   let baseAmount = contract.baseAmount();
+  // ONLY DO BASE AMOUNT - TO ACCOUNT FOR DIVIDENDS
   if (baseAmount.gt(ZERO_BI)) {
     pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
   }
-  let tokenAmount = contract.tokenAmount();
-  if (tokenAmount.gt(ZERO_BI)) {
-    pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
-  }
-  let totalSupply = contract.totalSupply();
-  if (totalSupply.gt(ZERO_BI)) {
-    pool.totalSupply = BigDecimal.fromString(totalSupply.toString());
-  }
+  // let tokenAmount = contract.tokenAmount();
+  // if (tokenAmount.gt(ZERO_BI)) {
+  //   pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
+  // }
+  // let totalSupply = contract.totalSupply();
+  // if (totalSupply.gt(ZERO_BI)) {
+  //   pool.totalSupply = BigDecimal.fromString(totalSupply.toString());
+  // }
   pool.save();
 }
