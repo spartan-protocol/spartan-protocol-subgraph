@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -14,12 +14,9 @@ import {
   Swap,
   Member,
 } from "../generated/schema";
-import { addr_poolFactory, stableCoins, ZERO_BD } from "./const";
+import { addr_poolFactory, ZERO_BD } from "./const";
 import {
   checkMember,
-  fetchTokenAddr,
-  fetchTokenName,
-  fetchTokenSymbol,
   getDerivedSparta,
   loadTransaction,
   sync,
@@ -109,7 +106,6 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   member.liqNetUSD = member.liqNetUSD.plus(liqRemove.derivedUSD);
 
   pool.save();
-  sync(Address.fromString(poolAddress));
   updateSpartaPrice();
   liqRemove.save();
   member.save();
@@ -164,7 +160,7 @@ export function handleSwapped(event: Swapped): void {
   memberLoaded.fees = memberLoaded.fees.plus(fee);
 
   pool.save();
-  sync(Address.fromString(poolAddress));
+  sync(Address.fromString(poolAddress)); // WE CAN TRACK 'CURATED' STATUS & ONLY CALL THIS IF CURATED === TRUE TO SAVE SYNC TIME HERE
   updateSpartaPrice();
   swap.save();
   memberLoaded.save();
