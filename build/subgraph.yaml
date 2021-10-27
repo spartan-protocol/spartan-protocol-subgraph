@@ -17,8 +17,9 @@ dataSources:
       language: wasm/assemblyscript
       file: PoolFactory\PoolFactory.wasm
       entities:
-        - Pool
+        - PoolFactory
         - Token
+        - Pool
       abis:
         - name: PoolFactory
           file: PoolFactory\abis\PoolFactory.json
@@ -46,15 +47,12 @@ dataSources:
       language: wasm/assemblyscript
       file: Dao\Dao.wasm
       entities:
-        - Pool
-        - Token
+        - Transaction
+        - Harvest
+        - Member
       abis:
         - name: Dao
           file: Dao\abis\Dao.json
-        - name: iBEP20
-          file: Dao\abis\iBEP20.json
-        - name: Pool
-          file: Dao\abis\Pool.json
       eventHandlers:
         - event: Harvest(indexed address,uint256)
           handler: handleHarvest
@@ -72,14 +70,9 @@ dataSources:
       file: Router\Router.wasm
       entities:
         - Pool
-        - Token
       abis:
         - name: Router
           file: Router\abis\Router.json
-        - name: iBEP20
-          file: Router\abis\iBEP20.json
-        - name: Pool
-          file: Router\abis\Pool.json
       eventHandlers:
         - event: Dividend(address,uint256)
           handler: handleDividend
@@ -97,14 +90,9 @@ dataSources:
       file: Reserve1\Reserve1.wasm
       entities:
         - Pool
-        - Token
       abis:
         - name: Reserve
           file: Reserve1\abis\Reserve.json
-        - name: iBEP20
-          file: Reserve1\abis\iBEP20.json
-        - name: Pool
-          file: Reserve1\abis\Pool.json
       eventHandlers:
         - event: RealisePOL(address,uint256)
           handler: handleRealisePOL
@@ -122,14 +110,9 @@ dataSources:
       file: Reserve1\Reserve1.wasm
       entities:
         - Pool
-        - Token
       abis:
         - name: Reserve
           file: Reserve2\abis\Reserve.json
-        - name: iBEP20
-          file: Reserve2\abis\iBEP20.json
-        - name: Pool
-          file: Reserve2\abis\Pool.json
       eventHandlers:
         - event: RealisePOL(address,uint256)
           handler: handleRealisePOL
@@ -146,7 +129,13 @@ templates:
       file: templates\Pool\Pool.wasm
       entities:
         - Pool
-        - Token
+        - Member
+        - Transaction
+        - LiqAdd
+        - LiqRemove
+        - Swap
+        - MintSynth
+        - BurnSynth
       abis:
         - name: Pool
           file: Pool\abis\Pool.json

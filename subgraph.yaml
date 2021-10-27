@@ -17,8 +17,9 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mapping.ts
       entities:
-        - Pool
+        - PoolFactory
         - Token
+        - Pool
       abis:
         - name: PoolFactory
           file: ./abis/PoolFactory.json
@@ -46,15 +47,12 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappingDao.ts
       entities:
-        - Pool
-        - Token
+        - Transaction
+        - Harvest
+        - Member
       abis:
         - name: Dao
           file: ./abis/Dao.json
-        - name: iBEP20
-          file: ./abis/iBEP20.json
-        - name: Pool
-          file: ./abis/Pool.json
       eventHandlers:
         - event: Harvest(indexed address,uint256)
           handler: handleHarvest
@@ -72,14 +70,9 @@ dataSources:
       file: ./src/mappingRouter.ts
       entities:
         - Pool
-        - Token
       abis:
         - name: Router
           file: ./abis/Router.json
-        - name: iBEP20
-          file: ./abis/iBEP20.json
-        - name: Pool
-          file: ./abis/Pool.json
       eventHandlers:
         - event: Dividend(address,uint256)
           handler: handleDividend
@@ -97,14 +90,9 @@ dataSources:
       file: ./src/mappingReserve.ts
       entities:
         - Pool
-        - Token
       abis:
         - name: Reserve
           file: ./abis/Reserve.json
-        - name: iBEP20
-          file: ./abis/iBEP20.json
-        - name: Pool
-          file: ./abis/Pool.json
       eventHandlers:
         - event: RealisePOL(address,uint256)
           handler: handleRealisePOL
@@ -122,14 +110,9 @@ dataSources:
       file: ./src/mappingReserve.ts
       entities:
         - Pool
-        - Token
       abis:
         - name: Reserve
           file: ./abis/Reserve.json
-        - name: iBEP20
-          file: ./abis/iBEP20.json
-        - name: Pool
-          file: ./abis/Pool.json
       eventHandlers:
         - event: RealisePOL(address,uint256)
           handler: handleRealisePOL
@@ -146,7 +129,13 @@ templates:
       file: ./src/mappingPool.ts
       entities:
         - Pool
-        - Token
+        - Member
+        - Transaction
+        - LiqAdd
+        - LiqRemove
+        - Swap
+        - MintSynth
+        - BurnSynth
       abis:
         - name: Pool
           file: ./abis/Pool.json

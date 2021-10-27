@@ -54,6 +54,8 @@ export function handleCreatePool(event: CreatePool): void {
     // pool.curated = false;
     pool.fees = ZERO_BD;
     pool.feesUSD = ZERO_BD;
+    pool.incentives = ZERO_BD;
+    pool.incentivesUSD = ZERO_BD;
     pool.stablecoin = stableCoins.includes(token.id);
     pool.tvlSPARTA = ZERO_BD;
     pool.tvlUSD = ZERO_BD;

@@ -9,24 +9,26 @@ import { checkMember, loadTransaction } from "./utils";
 
 export function handleHarvest(event: Harvest): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
-  // let owner = event.params.owner.toHexString();
-  // let harvested = event.params.amount.toBigDecimal();
-  // let derivedUSD = harvested.times(poolFactory.spartaDerivedUSD);
+  let owner = event.params.owner.toHexString();
+  let harvested = event.params.amount.toBigDecimal();
+  let derivedUSD = harvested.times(poolFactory.spartaDerivedUSD);
 
-  // let transaction = loadTransaction(event);
-  // let harvest = new HarvestSchem(
-  //   transaction.id.toString() + "#" + event.logIndex.toString()
-  // );
-  // harvest.transaction = transaction.id;
-  // harvest.logIndex = event.logIndex;
-  // harvest.member = owner;
-  // harvest.origin = event.transaction.from;
-  // harvest.derivedSparta = harvested;
-  // harvest.derivedUSD = derivedUSD;
+  let transaction = loadTransaction(event);
+  let harvest = new HarvestSchem(
+    transaction.id.toString() + "#" + event.logIndex.toString()
+  );
+  harvest.transaction = transaction.id;
+  harvest.logIndex = event.logIndex;
+  harvest.timestamp = transaction.timestamp;
+  checkMember(owner);
+  harvest.member = owner;
+  harvest.origin = event.transaction.from;
+  harvest.derivedSparta = harvested;
+  harvest.derivedUSD = derivedUSD;
 
-  // let member = Member.load(owner);
-  // member.liqNetSparta = member.liqNetSparta.minus(harvested);
-  // member.liqNetUSD = member.liqNetUSD.minus(derivedUSD);
-  // harvest.save();
-  // member.save();
+  let member = Member.load(owner);
+  member.liqNetSparta = member.liqNetSparta.minus(harvested);
+  member.liqNetUSD = member.liqNetUSD.minus(derivedUSD);
+  harvest.save();
+  member.save();
 }

@@ -161,12 +161,12 @@ export function handleSwapped(event: Swapped): void {
 
   pool.save();
   // SYNC BASEAMOUNT IF CURATED (DIVIDEND) && BEFORE THE ROUTER WAS UPGRADED TO INC DIVI EVENT
-  // if (
-  //   event.block.number.lt(BigInt.fromI32(12093273)) &&
-  //   preDiviEventCurateds.includes(pool.id)
-  // ) {
-  //   sync(Address.fromString(poolAddress));
-  // }
+  if (
+    event.block.number.lt(BigInt.fromI32(12093273)) &&
+    preDiviEventCurateds.includes(pool.id)
+  ) {
+    sync(Address.fromString(poolAddress));
+  }
   updateSpartaPrice();
   swap.save();
   memberLoaded.save();
@@ -246,7 +246,7 @@ export function handleBurnSynth(event: BurnSynth): void {
   // pool.fees = pool.fees.plus(fee);
 
   // let transaction = loadTransaction(event);
-  // let burnSynth = new MintSynth(
+  // let burnSynth = new BurnSynth(
   //   transaction.id.toString() + "#" + event.logIndex.toString()
   // );
   // burnSynth.transaction = transaction.id;
