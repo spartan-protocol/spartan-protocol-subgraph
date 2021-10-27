@@ -27,6 +27,8 @@ type Pool @entity {
   tokenAmount: BigDecimal! # TOKEN balance
   fees: BigDecimal! # Slip fees paid into the pool
   feesUSD: BigDecimal!
+  incentives: BigDecimal! # Incentives paid into the pool (divis, realises etc)
+  incentivesUSD: BigDecimal!
   stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
   tvlSPARTA: BigDecimal!
   tvlUSD: BigDecimal!
@@ -48,6 +50,7 @@ type Member @entity {
   swaps: [Swap!]! @derivedFrom(field: "member")
   mintSynths: [MintSynth!]! @derivedFrom(field: "member")
   burnSynths: [BurnSynth!]! @derivedFrom(field: "member")
+  harvests: [Harvest]! @derivedFrom(field: "member")
 }
 
 type Transaction @entity {
@@ -61,6 +64,7 @@ type Transaction @entity {
   swaps: [Swap]! @derivedFrom(field: "transaction")
   mintSynths: [MintSynth]! @derivedFrom(field: "transaction")
   burnSynths: [BurnSynth]! @derivedFrom(field: "transaction")
+  harvests: [Harvest]! @derivedFrom(field: "transaction")
 }
 
 type LiqAdd @entity {
@@ -136,6 +140,17 @@ type BurnSynth @entity {
   origin: Bytes!
   outputSparta: BigDecimal!
   burnedSynths: BigDecimal!
+  derivedUSD: BigDecimal!
+}
+
+type Harvest @entity {
+  id: ID! # TxnHash + logIndex
+  transaction: Transaction!
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  member: Member!
+  origin: Bytes!
+  derivedSparta: BigDecimal!
   derivedUSD: BigDecimal!
 }
 

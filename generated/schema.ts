@@ -275,6 +275,24 @@ export class Pool extends Entity {
     this.set("feesUSD", Value.fromBigDecimal(value));
   }
 
+  get incentives(): BigDecimal {
+    let value = this.get("incentives");
+    return value.toBigDecimal();
+  }
+
+  set incentives(value: BigDecimal) {
+    this.set("incentives", Value.fromBigDecimal(value));
+  }
+
+  get incentivesUSD(): BigDecimal {
+    let value = this.get("incentivesUSD");
+    return value.toBigDecimal();
+  }
+
+  set incentivesUSD(value: BigDecimal) {
+    this.set("incentivesUSD", Value.fromBigDecimal(value));
+  }
+
   get stablecoin(): boolean {
     let value = this.get("stablecoin");
     return value.toBoolean();
@@ -449,6 +467,15 @@ export class Member extends Entity {
   set burnSynths(value: Array<string>) {
     this.set("burnSynths", Value.fromStringArray(value));
   }
+
+  get harvests(): Array<string | null> {
+    let value = this.get("harvests");
+    return value.toStringArray();
+  }
+
+  set harvests(value: Array<string | null>) {
+    this.set("harvests", Value.fromStringArray(value));
+  }
 }
 
 export class Transaction extends Entity {
@@ -560,6 +587,15 @@ export class Transaction extends Entity {
 
   set burnSynths(value: Array<string | null>) {
     this.set("burnSynths", Value.fromStringArray(value));
+  }
+
+  get harvests(): Array<string | null> {
+    let value = this.get("harvests");
+    return value.toStringArray();
+  }
+
+  set harvests(value: Array<string | null>) {
+    this.set("harvests", Value.fromStringArray(value));
   }
 }
 
@@ -1250,6 +1286,108 @@ export class BurnSynth extends Entity {
 
   set burnedSynths(value: BigDecimal) {
     this.set("burnedSynths", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
+  }
+}
+
+export class Harvest extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Harvest entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Harvest entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Harvest", id.toString(), this);
+  }
+
+  static load(id: string): Harvest | null {
+    return store.get("Harvest", id) as Harvest | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
+  get logIndex(): BigInt | null {
+    let value = this.get("logIndex");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set logIndex(value: BigInt | null) {
+    if (value === null) {
+      this.unset("logIndex");
+    } else {
+      this.set("logIndex", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get member(): string {
+    let value = this.get("member");
+    return value.toString();
+  }
+
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
+  }
+
+  get origin(): Bytes {
+    let value = this.get("origin");
+    return value.toBytes();
+  }
+
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
+  }
+
+  get derivedSparta(): BigDecimal {
+    let value = this.get("derivedSparta");
+    return value.toBigDecimal();
+  }
+
+  set derivedSparta(value: BigDecimal) {
+    this.set("derivedSparta", Value.fromBigDecimal(value));
   }
 
   get derivedUSD(): BigDecimal {

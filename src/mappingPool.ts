@@ -1,4 +1,4 @@
-import { Address } from "@graphprotocol/graph-ts";
+import { Address, BigInt } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -14,7 +14,7 @@ import {
   Swap,
   Member,
 } from "../generated/schema";
-import { addr_poolFactory, ZERO_BD } from "./const";
+import { addr_poolFactory, preDiviEventCurateds, ZERO_BD } from "./const";
 import {
   checkMember,
   getDerivedSparta,
@@ -160,7 +160,13 @@ export function handleSwapped(event: Swapped): void {
   memberLoaded.fees = memberLoaded.fees.plus(fee);
 
   pool.save();
-  sync(Address.fromString(poolAddress)); // WE CAN TRACK 'CURATED' STATUS & ONLY CALL THIS IF CURATED === TRUE TO SAVE SYNC TIME HERE
+  // SYNC BASEAMOUNT IF CURATED (DIVIDEND) && BEFORE THE ROUTER WAS UPGRADED TO INC DIVI EVENT
+  // if (
+  //   event.block.number.lt(BigInt.fromI32(12093273)) &&
+  //   preDiviEventCurateds.includes(pool.id)
+  // ) {
+  //   sync(Address.fromString(poolAddress));
+  // }
   updateSpartaPrice();
   swap.save();
   memberLoaded.save();

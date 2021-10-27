@@ -224,6 +224,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     pool.tvlSPARTA = poolObj.tvlSPARTA;
     pool.tvlUSD = poolObj.tvlUSD;
     pool.save();
+    sync(Address.fromString(poolAddr));
   }
 }
 
@@ -253,7 +254,6 @@ export function sync(poolAddr: Address): void {
   let pool = Pool.load(poolAddr.toHexString());
   let contract = PoolGen.bind(poolAddr);
   let baseAmount = contract.baseAmount();
-  // ONLY DO BASE AMOUNT - TO ACCOUNT FOR DIVIDENDS
   if (baseAmount.gt(ZERO_BI)) {
     pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
   }

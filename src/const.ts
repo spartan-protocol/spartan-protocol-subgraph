@@ -19,6 +19,13 @@ export const addr_synthFactory = "0x8b2643d95dead636ec3ba5f720809541c3355f4e"; /
 export const addr_synthVault = "0xa6c3288c18505d134445cb4fe8499da22002f1e0"; //
 export const addr_utils = "0x82b67e7a325def377f62401126cc54eee73719ec"; //
 
+export let preDiviEventCurateds: string[] = [
+  // POOLS THAT WERE CURATED FROM MN DEPLOY UP UNTIL THE FIRST HARVEST EVENT (BLOCK: 12093273)
+  "0xa0ab4b300e2ccd801178b28e5de0a8f24614b54c", // BUSDp
+  "0x972c7278ecfdcf97556f9c53075576a8bc6547ab", // BNBp
+  "0xcc80f0f3746b4561dd7e6e7da4b8cda2ffebc15a", // BTCBp
+];
+
 export let stableCoins: string[] = [
   // ADD ALL POSSIBLE FUTURE STABLECOINS HERE
   "0x8ac76a51cc950d9822d68b83fe1ad97b32cd580d", // USDC
