@@ -40,8 +40,8 @@ export function handleHarvest(event: Harvest): void {
   harvest.save();
 
   let member = Member.load(owner);
-  member.netHarvestSparta = member.netHarvestSparta.minus(harvested);
-  member.netHarvestUsd = member.netHarvestUsd.minus(derivedUSD);
+  member.netHarvestSparta = member.netHarvestSparta.plus(harvested);
+  member.netHarvestUsd = member.netHarvestUsd.plus(derivedUSD);
   member.save();
 }
 
