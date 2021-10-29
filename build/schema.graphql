@@ -45,12 +45,17 @@ type Member @entity {
   fees: BigDecimal! # Slip fees paid into the pools
   liqNetSparta: BigDecimal!
   liqNetUSD: BigDecimal!
+  netHarvestSparta: BigDecimal!
+  netHarvestUSD: BigDecimal!
+  netRealisedSparta: BigDecimal!
+  netRealisedUSD: BigDecimal!
   liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
   swaps: [Swap!]! @derivedFrom(field: "member")
   mintSynths: [MintSynth!]! @derivedFrom(field: "member")
   burnSynths: [BurnSynth!]! @derivedFrom(field: "member")
   harvests: [Harvest]! @derivedFrom(field: "member")
+  bonds: [Bond]! @derivedFrom(field: "member")
 }
 
 type Transaction @entity {
@@ -65,6 +70,7 @@ type Transaction @entity {
   mintSynths: [MintSynth]! @derivedFrom(field: "transaction")
   burnSynths: [BurnSynth]! @derivedFrom(field: "transaction")
   harvests: [Harvest]! @derivedFrom(field: "transaction")
+  bonds: [Bond]! @derivedFrom(field: "transaction")
 }
 
 type LiqAdd @entity {
@@ -150,6 +156,21 @@ type Harvest @entity {
   timestamp: BigInt! # timestamp of transaction
   member: Member!
   origin: Bytes!
+  derivedSparta: BigDecimal!
+  derivedUSD: BigDecimal!
+}
+
+type Bond @entity {
+  id: ID! # TxnHash + logIndex
+  transaction: Transaction!
+  logIndex: BigInt
+  timestamp: BigInt! # timestamp of transaction
+  pool: Pool!
+  token: Token!
+  member: Member!
+  origin: Bytes!
+  inputToken: BigDecimal!
+  unitsIssued: BigDecimal!
   derivedSparta: BigDecimal!
   derivedUSD: BigDecimal!
 }

@@ -50,12 +50,15 @@ dataSources:
         - Transaction
         - Harvest
         - Member
+        - DepositAsset
       abis:
         - name: Dao
           file: Dao\abis\Dao.json
       eventHandlers:
         - event: Harvest(indexed address,uint256)
           handler: handleHarvest
+        - event: DepositAsset(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleBond
   - kind: ethereum/contract
     name: Router
     network: bsc

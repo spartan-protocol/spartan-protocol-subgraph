@@ -1,4 +1,4 @@
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -32,10 +32,14 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   let inputBase = event.params.inputBase.toBigDecimal();
   let inputToken = event.params.inputToken.toBigDecimal();
   let unitsIssued = event.params.unitsIssued.toBigDecimal();
+  let totalUnitsIssued = unitsIssued;
 
+  if (pool.baseAmount.equals(ZERO_BD) || pool.tokenAmount.equals(ZERO_BD)) {
+    totalUnitsIssued = unitsIssued.div(BigDecimal.fromString("0.99"));
+  }
   pool.baseAmount = pool.baseAmount.plus(inputBase);
   pool.tokenAmount = pool.tokenAmount.plus(inputToken);
-  pool.totalSupply = pool.totalSupply.plus(unitsIssued);
+  pool.totalSupply = pool.totalSupply.plus(totalUnitsIssued);
 
   pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
   updateSpartaPrice();

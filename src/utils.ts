@@ -154,10 +154,12 @@ export function updateTVL(poolAddr: string): void {
   let pool = Pool.load(poolAddr);
   poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.minus(pool.tvlSPARTA);
   poolFactory.tvlUSD = poolFactory.tvlUSD.minus(pool.tvlUSD);
-  pool.tvlSPARTA = pool.baseAmount.times(BigDecimal.fromString("2"));
-  pool.tvlUSD = pool.tvlSPARTA.times(poolFactory.spartaDerivedUSD);
-  poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.plus(pool.tvlSPARTA);
-  poolFactory.tvlUSD = poolFactory.tvlUSD.plus(pool.tvlUSD);
+  let derivedSparta = pool.baseAmount.times(BigDecimal.fromString("2"));
+  let derivedUSD = derivedSparta.times(poolFactory.spartaDerivedUSD);
+  pool.tvlSPARTA = derivedSparta;
+  pool.tvlUSD = derivedUSD;
+  poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.plus(derivedSparta);
+  poolFactory.tvlUSD = poolFactory.tvlUSD.plus(derivedUSD);
   pool.save();
   poolFactory.save();
 }
@@ -246,6 +248,10 @@ export function checkMember(memberAddr: string): void {
     member.fees = ZERO_BD;
     member.liqNetSparta = ZERO_BD;
     member.liqNetUSD = ZERO_BD;
+    member.netHarvestSparta = ZERO_BD;
+    member.netHarvestUSD = ZERO_BD;
+    member.netRealisedSparta = ZERO_BD;
+    member.netRealisedUSD = ZERO_BD;
     member.save();
   }
 }
@@ -257,13 +263,19 @@ export function sync(poolAddr: Address): void {
   if (baseAmount.gt(ZERO_BI)) {
     pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
   }
-  // let tokenAmount = contract.tokenAmount();
-  // if (tokenAmount.gt(ZERO_BI)) {
-  //   pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
-  // }
-  // let totalSupply = contract.totalSupply();
-  // if (totalSupply.gt(ZERO_BI)) {
-  //   pool.totalSupply = BigDecimal.fromString(totalSupply.toString());
-  // }
+  pool.save();
+}
+
+export function syncBoth(poolAddr: Address): void {
+  let pool = Pool.load(poolAddr.toHexString());
+  let contract = PoolGen.bind(poolAddr);
+  let baseAmount = contract.baseAmount();
+  if (baseAmount.gt(ZERO_BI)) {
+    pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
+  }
+  let tokenAmount = contract.tokenAmount();
+  if (tokenAmount.gt(ZERO_BI)) {
+    pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
+  }
   pool.save();
 }

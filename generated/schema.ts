@@ -423,6 +423,42 @@ export class Member extends Entity {
     this.set("liqNetUSD", Value.fromBigDecimal(value));
   }
 
+  get netHarvestSparta(): BigDecimal {
+    let value = this.get("netHarvestSparta");
+    return value.toBigDecimal();
+  }
+
+  set netHarvestSparta(value: BigDecimal) {
+    this.set("netHarvestSparta", Value.fromBigDecimal(value));
+  }
+
+  get netHarvestUSD(): BigDecimal {
+    let value = this.get("netHarvestUSD");
+    return value.toBigDecimal();
+  }
+
+  set netHarvestUSD(value: BigDecimal) {
+    this.set("netHarvestUSD", Value.fromBigDecimal(value));
+  }
+
+  get netRealisedSparta(): BigDecimal {
+    let value = this.get("netRealisedSparta");
+    return value.toBigDecimal();
+  }
+
+  set netRealisedSparta(value: BigDecimal) {
+    this.set("netRealisedSparta", Value.fromBigDecimal(value));
+  }
+
+  get netRealisedUSD(): BigDecimal {
+    let value = this.get("netRealisedUSD");
+    return value.toBigDecimal();
+  }
+
+  set netRealisedUSD(value: BigDecimal) {
+    this.set("netRealisedUSD", Value.fromBigDecimal(value));
+  }
+
   get liqAdds(): Array<string> {
     let value = this.get("liqAdds");
     return value.toStringArray();
@@ -475,6 +511,15 @@ export class Member extends Entity {
 
   set harvests(value: Array<string | null>) {
     this.set("harvests", Value.fromStringArray(value));
+  }
+
+  get bonds(): Array<string | null> {
+    let value = this.get("bonds");
+    return value.toStringArray();
+  }
+
+  set bonds(value: Array<string | null>) {
+    this.set("bonds", Value.fromStringArray(value));
   }
 }
 
@@ -596,6 +641,15 @@ export class Transaction extends Entity {
 
   set harvests(value: Array<string | null>) {
     this.set("harvests", Value.fromStringArray(value));
+  }
+
+  get bonds(): Array<string | null> {
+    let value = this.get("bonds");
+    return value.toStringArray();
+  }
+
+  set bonds(value: Array<string | null>) {
+    this.set("bonds", Value.fromStringArray(value));
   }
 }
 
@@ -1379,6 +1433,144 @@ export class Harvest extends Entity {
 
   set origin(value: Bytes) {
     this.set("origin", Value.fromBytes(value));
+  }
+
+  get derivedSparta(): BigDecimal {
+    let value = this.get("derivedSparta");
+    return value.toBigDecimal();
+  }
+
+  set derivedSparta(value: BigDecimal) {
+    this.set("derivedSparta", Value.fromBigDecimal(value));
+  }
+
+  get derivedUSD(): BigDecimal {
+    let value = this.get("derivedUSD");
+    return value.toBigDecimal();
+  }
+
+  set derivedUSD(value: BigDecimal) {
+    this.set("derivedUSD", Value.fromBigDecimal(value));
+  }
+}
+
+export class Bond extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Bond entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Bond entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Bond", id.toString(), this);
+  }
+
+  static load(id: string): Bond | null {
+    return store.get("Bond", id) as Bond | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get transaction(): string {
+    let value = this.get("transaction");
+    return value.toString();
+  }
+
+  set transaction(value: string) {
+    this.set("transaction", Value.fromString(value));
+  }
+
+  get logIndex(): BigInt | null {
+    let value = this.get("logIndex");
+    if (value === null || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set logIndex(value: BigInt | null) {
+    if (value === null) {
+      this.unset("logIndex");
+    } else {
+      this.set("logIndex", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
+  }
+
+  get token(): string {
+    let value = this.get("token");
+    return value.toString();
+  }
+
+  set token(value: string) {
+    this.set("token", Value.fromString(value));
+  }
+
+  get member(): string {
+    let value = this.get("member");
+    return value.toString();
+  }
+
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
+  }
+
+  get origin(): Bytes {
+    let value = this.get("origin");
+    return value.toBytes();
+  }
+
+  set origin(value: Bytes) {
+    this.set("origin", Value.fromBytes(value));
+  }
+
+  get inputToken(): BigDecimal {
+    let value = this.get("inputToken");
+    return value.toBigDecimal();
+  }
+
+  set inputToken(value: BigDecimal) {
+    this.set("inputToken", Value.fromBigDecimal(value));
+  }
+
+  get unitsIssued(): BigDecimal {
+    let value = this.get("unitsIssued");
+    return value.toBigDecimal();
+  }
+
+  set unitsIssued(value: BigDecimal) {
+    this.set("unitsIssued", Value.fromBigDecimal(value));
   }
 
   get derivedSparta(): BigDecimal {
