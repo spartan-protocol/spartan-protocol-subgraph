@@ -40,15 +40,11 @@ type Pool @entity {
 }
 
 type Member @entity {
-  # Add in a running NET sum of add/removes etc to get a position without having to call any arrays (USD/SPARTA/etc)
   id: ID! # Member's wallet address
   fees: BigDecimal! # Slip fees paid into the pools
-  liqNetSparta: BigDecimal!
-  liqNetUSD: BigDecimal!
-  netHarvestSparta: BigDecimal!
-  netHarvestUSD: BigDecimal!
-  netRealisedSparta: BigDecimal!
-  netRealisedUSD: BigDecimal!
+  netDerivedUsd: BigDecimal! # NET liq position derived in USD (realised, exc. harvest)
+  netHarvestSparta: BigDecimal! # Tally of SPARTA harvested
+  netHarvestUsd: BigDecimal! # Tally of SPARTA harvested derived in USD
   liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
   swaps: [Swap!]! @derivedFrom(field: "member")
@@ -56,6 +52,17 @@ type Member @entity {
   burnSynths: [BurnSynth!]! @derivedFrom(field: "member")
   harvests: [Harvest]! @derivedFrom(field: "member")
   bonds: [Bond]! @derivedFrom(field: "member")
+  positions: [Position]! @derivedFrom(field: "member")
+}
+
+type Position @entity {
+  id: ID! # Member's wallet address + Pool Address
+  member: Member!
+  pool: Pool!
+  netSparta: BigDecimal! # NET liq position in SPARTA (realised)
+  netToken: BigDecimal! # NET liq position in TOKEN (realised)
+  netDerivedUsd: BigDecimal! # NET liq position derived in USD (realised)
+  netLiqUnits: BigDecimal! # NET liq tokens
 }
 
 type Transaction @entity {
@@ -85,7 +92,6 @@ type LiqAdd @entity {
   inputBase: BigDecimal!
   inputToken: BigDecimal!
   unitsIssued: BigDecimal!
-  derivedSparta: BigDecimal!
   derivedUSD: BigDecimal!
 }
 
@@ -101,7 +107,6 @@ type LiqRemove @entity {
   inputLPs: BigDecimal!
   outputToken: BigDecimal!
   outputSparta: BigDecimal!
-  derivedSparta: BigDecimal!
   derivedUSD: BigDecimal!
 }
 
@@ -171,7 +176,6 @@ type Bond @entity {
   origin: Bytes!
   inputToken: BigDecimal!
   unitsIssued: BigDecimal!
-  derivedSparta: BigDecimal!
   derivedUSD: BigDecimal!
 }
 

@@ -6,10 +6,12 @@ import {
   Member,
   Pool,
   Bond,
+  Position,
 } from "../generated/schema";
 import { addr_poolFactory, ZERO_BD } from "./const";
 import {
   checkMember,
+  checkPosition,
   getDerivedSparta,
   loadTransaction,
   sync,
@@ -35,28 +37,30 @@ export function handleHarvest(event: Harvest): void {
   harvest.origin = event.transaction.from;
   harvest.derivedSparta = harvested;
   harvest.derivedUSD = derivedUSD;
+  harvest.save();
 
   let member = Member.load(owner);
   member.netHarvestSparta = member.netHarvestSparta.minus(harvested);
-  member.netHarvestUSD = member.netHarvestUSD.minus(derivedUSD);
-  member.netRealisedSparta = member.netRealisedSparta.minus(harvested);
-  member.netRealisedUSD = member.netRealisedUSD.minus(derivedUSD);
-  harvest.save();
+  member.netHarvestUsd = member.netHarvestUsd.minus(derivedUSD);
   member.save();
 }
 
 export function handleBond(event: DepositAsset): void {
+  let poolFactory = PoolFactory.load(addr_poolFactory);
+
   let inputToken = event.params.depositAmount.toBigDecimal();
   let unitsIssued = event.params.bondedLP.toBigDecimal(); // To keep total supply synced
   let poolAddress = event.params.poolAddress.toHexString();
+  let owner = event.params.owner.toHexString();
+
   let pool = Pool.load(poolAddress);
+  let derivedSparta = getDerivedSparta(ZERO_BD, inputToken, pool.id);
+  let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
+
   pool.tokenAmount = pool.tokenAmount.plus(inputToken);
   pool.totalSupply = pool.totalSupply.plus(unitsIssued);
-  pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
+  pool.save();
   sync(Address.fromString(poolAddress)); // Have to sync here as we dont track SPARTA amount going in
-  updateSpartaPrice();
-
-  let poolFactory = PoolFactory.load(addr_poolFactory);
 
   let transaction = loadTransaction(event);
   let bond = new Bond(
@@ -67,19 +71,25 @@ export function handleBond(event: DepositAsset): void {
   bond.timestamp = transaction.timestamp;
   bond.pool = pool.id;
   bond.token = pool.token0;
-  checkMember(event.params.owner.toHexString());
-  bond.member = event.params.owner.toHexString();
   bond.origin = event.transaction.from;
   bond.inputToken = inputToken;
   bond.unitsIssued = unitsIssued;
-  bond.derivedSparta = getDerivedSparta(ZERO_BD, inputToken, pool.id);
-  bond.derivedUSD = bond.derivedSparta.times(poolFactory.spartaDerivedUSD);
+  bond.derivedUSD = derivedUsd;
 
-  let member = Member.load(event.params.owner.toHexString());
-  member.liqNetSparta = member.liqNetSparta.minus(bond.derivedSparta);
-  member.liqNetUSD = member.liqNetUSD.minus(bond.derivedUSD);
-
+  checkMember(owner);
+  bond.member = owner;
   bond.save();
+  let member = Member.load(owner);
+  member.netDerivedUsd = member.netDerivedUsd.minus(derivedUsd);
   member.save();
+
+  checkPosition(owner, poolAddress);
+  let position = Position.load(owner + "#" + poolAddress);
+  position.netToken = position.netToken.minus(inputToken);
+  position.netDerivedUsd = position.netDerivedUsd.minus(derivedUsd);
+  position.netLiqUnits = position.netLiqUnits.plus(unitsIssued);
+  position.save();
+
+  updateSpartaPrice();
   updateTVL(pool.id);
 }

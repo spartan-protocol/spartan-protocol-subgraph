@@ -13,10 +13,12 @@ import {
   LiqRemove,
   Swap,
   Member,
+  Position,
 } from "../generated/schema";
 import { addr_poolFactory, preDiviEventCurateds, ZERO_BD } from "./const";
 import {
   checkMember,
+  checkPosition,
   getDerivedSparta,
   loadTransaction,
   sync,
@@ -28,22 +30,29 @@ import {
 export function handleAddLiquidity(event: AddLiquidity): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
+  let memberAddr = event.params.member.toHexString();
 
   let inputBase = event.params.inputBase.toBigDecimal();
   let inputToken = event.params.inputToken.toBigDecimal();
   let unitsIssued = event.params.unitsIssued.toBigDecimal();
   let totalUnitsIssued = unitsIssued;
 
-  if (pool.baseAmount.equals(ZERO_BD) || pool.tokenAmount.equals(ZERO_BD)) {
+  let initialAdd =
+    pool.baseAmount.equals(ZERO_BD) || pool.tokenAmount.equals(ZERO_BD);
+  if (initialAdd) {
     totalUnitsIssued = unitsIssued.div(BigDecimal.fromString("0.99"));
   }
   pool.baseAmount = pool.baseAmount.plus(inputBase);
   pool.tokenAmount = pool.tokenAmount.plus(inputToken);
   pool.totalSupply = pool.totalSupply.plus(totalUnitsIssued);
+  if (initialAdd) {
+    pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
+    updateSpartaPrice();
+  }
 
-  pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
-  updateSpartaPrice();
   let poolFactory = PoolFactory.load(addr_poolFactory);
+  let derivedSparta = getDerivedSparta(inputBase, inputToken, pool.id);
+  let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
 
   let transaction = loadTransaction(event);
   let liqAdd = new LiqAdd(
@@ -54,21 +63,32 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   liqAdd.timestamp = transaction.timestamp;
   liqAdd.pool = pool.id;
   liqAdd.token = pool.token0;
-  checkMember(event.params.member.toHexString());
-  liqAdd.member = event.params.member.toHexString();
   liqAdd.origin = event.transaction.from;
   liqAdd.inputBase = inputBase;
   liqAdd.inputToken = inputToken;
   liqAdd.unitsIssued = unitsIssued;
-  liqAdd.derivedSparta = getDerivedSparta(inputBase, inputToken, pool.id);
-  liqAdd.derivedUSD = liqAdd.derivedSparta.times(poolFactory.spartaDerivedUSD);
+  liqAdd.derivedUSD = derivedUsd;
 
-  let member = Member.load(event.params.member.toHexString());
-  member.liqNetSparta = member.liqNetSparta.minus(liqAdd.derivedSparta);
-  member.liqNetUSD = member.liqNetUSD.minus(liqAdd.derivedUSD);
-
+  checkMember(memberAddr);
+  liqAdd.member = memberAddr;
   liqAdd.save();
+  let member = Member.load(memberAddr);
+  member.netDerivedUsd = member.netDerivedUsd.minus(derivedUsd);
   member.save();
+
+  let positionId = memberAddr + "#" + poolAddress;
+  checkPosition(memberAddr, poolAddress);
+  let position = Position.load(positionId);
+  position.netSparta = position.netSparta.minus(inputBase);
+  position.netToken = position.netToken.minus(inputToken);
+  position.netDerivedUsd = position.netDerivedUsd.minus(derivedUsd);
+  position.netLiqUnits = position.netLiqUnits.plus(unitsIssued);
+  position.save();
+
+  if (!initialAdd) {
+    pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
+    updateSpartaPrice();
+  }
   updateTVL(pool.id);
 }
 
@@ -76,14 +96,19 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
+  let memberAddr = event.params.member.toHexString();
 
   let inputUnits = event.params.unitsClaimed.toBigDecimal();
   let outputBase = event.params.outputBase.toBigDecimal();
   let outputToken = event.params.outputToken.toBigDecimal();
 
+  let derivedSparta = getDerivedSparta(outputBase, outputToken, pool.id);
+  let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
+
   pool.baseAmount = pool.baseAmount.minus(outputBase);
   pool.tokenAmount = pool.tokenAmount.minus(outputToken);
   pool.totalSupply = pool.totalSupply.minus(inputUnits);
+  pool.save();
 
   let transaction = loadTransaction(event);
   let liqRemove = new LiqRemove(
@@ -94,25 +119,28 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   liqRemove.timestamp = transaction.timestamp;
   liqRemove.pool = pool.id;
   liqRemove.token = pool.token0;
-  checkMember(event.params.member.toHexString());
-  liqRemove.member = event.params.member.toHexString();
   liqRemove.origin = event.transaction.from;
   liqRemove.inputLPs = inputUnits;
   liqRemove.outputToken = outputToken;
   liqRemove.outputSparta = outputBase;
-  liqRemove.derivedSparta = getDerivedSparta(outputBase, outputToken, pool.id);
-  liqRemove.derivedUSD = liqRemove.derivedSparta.times(
-    poolFactory.spartaDerivedUSD
-  );
+  liqRemove.derivedUSD = derivedUsd;
 
-  let member = Member.load(event.params.member.toHexString());
-  member.liqNetSparta = member.liqNetSparta.plus(liqRemove.derivedSparta);
-  member.liqNetUSD = member.liqNetUSD.plus(liqRemove.derivedUSD);
-
-  pool.save();
-  updateSpartaPrice();
+  checkMember(memberAddr);
+  liqRemove.member = memberAddr;
   liqRemove.save();
+  let member = Member.load(memberAddr);
+  member.netDerivedUsd = member.netDerivedUsd.plus(derivedUsd);
   member.save();
+
+  checkPosition(memberAddr, poolAddress);
+  let position = Position.load(memberAddr + "#" + poolAddress);
+  position.netSparta = position.netSparta.plus(outputBase);
+  position.netToken = position.netToken.plus(outputToken);
+  position.netDerivedUsd = position.netDerivedUsd.plus(derivedUsd);
+  position.netLiqUnits = position.netLiqUnits.minus(inputUnits);
+  position.save();
+
+  updateSpartaPrice();
   updateTVL(pool.id);
 }
 

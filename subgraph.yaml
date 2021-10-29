@@ -51,6 +51,7 @@ dataSources:
         - Harvest
         - Member
         - DepositAsset
+        - Position
       abis:
         - name: Dao
           file: ./abis/Dao.json
@@ -139,6 +140,7 @@ templates:
         - Swap
         - MintSynth
         - BurnSynth
+        - Position
       abis:
         - name: Pool
           file: ./abis/Pool.json

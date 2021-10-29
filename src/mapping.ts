@@ -39,6 +39,7 @@ export function handleCreatePool(event: CreatePool): void {
     token.pool = event.params.pool.toHexString();
     poolFactory.tokenCount = poolFactory.tokenCount.plus(ONE_BI);
   }
+  token.save();
   // Load/create Pool
   let pool = Pool.load(event.params.pool.toHexString());
   if (!pool) {
@@ -61,10 +62,9 @@ export function handleCreatePool(event: CreatePool): void {
     pool.tvlUSD = ZERO_BD;
     poolFactory.poolCount = poolFactory.poolCount.plus(ONE_BI);
   }
-
   poolFactory.save();
-  token.save();
   pool.save();
+
   // Use template to create contract
   PoolTemplate.create(event.params.pool);
 }

@@ -405,22 +405,13 @@ export class Member extends Entity {
     this.set("fees", Value.fromBigDecimal(value));
   }
 
-  get liqNetSparta(): BigDecimal {
-    let value = this.get("liqNetSparta");
+  get netDerivedUsd(): BigDecimal {
+    let value = this.get("netDerivedUsd");
     return value.toBigDecimal();
   }
 
-  set liqNetSparta(value: BigDecimal) {
-    this.set("liqNetSparta", Value.fromBigDecimal(value));
-  }
-
-  get liqNetUSD(): BigDecimal {
-    let value = this.get("liqNetUSD");
-    return value.toBigDecimal();
-  }
-
-  set liqNetUSD(value: BigDecimal) {
-    this.set("liqNetUSD", Value.fromBigDecimal(value));
+  set netDerivedUsd(value: BigDecimal) {
+    this.set("netDerivedUsd", Value.fromBigDecimal(value));
   }
 
   get netHarvestSparta(): BigDecimal {
@@ -432,31 +423,13 @@ export class Member extends Entity {
     this.set("netHarvestSparta", Value.fromBigDecimal(value));
   }
 
-  get netHarvestUSD(): BigDecimal {
-    let value = this.get("netHarvestUSD");
+  get netHarvestUsd(): BigDecimal {
+    let value = this.get("netHarvestUsd");
     return value.toBigDecimal();
   }
 
-  set netHarvestUSD(value: BigDecimal) {
-    this.set("netHarvestUSD", Value.fromBigDecimal(value));
-  }
-
-  get netRealisedSparta(): BigDecimal {
-    let value = this.get("netRealisedSparta");
-    return value.toBigDecimal();
-  }
-
-  set netRealisedSparta(value: BigDecimal) {
-    this.set("netRealisedSparta", Value.fromBigDecimal(value));
-  }
-
-  get netRealisedUSD(): BigDecimal {
-    let value = this.get("netRealisedUSD");
-    return value.toBigDecimal();
-  }
-
-  set netRealisedUSD(value: BigDecimal) {
-    this.set("netRealisedUSD", Value.fromBigDecimal(value));
+  set netHarvestUsd(value: BigDecimal) {
+    this.set("netHarvestUsd", Value.fromBigDecimal(value));
   }
 
   get liqAdds(): Array<string> {
@@ -520,6 +493,100 @@ export class Member extends Entity {
 
   set bonds(value: Array<string | null>) {
     this.set("bonds", Value.fromStringArray(value));
+  }
+
+  get positions(): Array<string | null> {
+    let value = this.get("positions");
+    return value.toStringArray();
+  }
+
+  set positions(value: Array<string | null>) {
+    this.set("positions", Value.fromStringArray(value));
+  }
+}
+
+export class Position extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save Position entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save Position entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("Position", id.toString(), this);
+  }
+
+  static load(id: string): Position | null {
+    return store.get("Position", id) as Position | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get member(): string {
+    let value = this.get("member");
+    return value.toString();
+  }
+
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
+  }
+
+  get netSparta(): BigDecimal {
+    let value = this.get("netSparta");
+    return value.toBigDecimal();
+  }
+
+  set netSparta(value: BigDecimal) {
+    this.set("netSparta", Value.fromBigDecimal(value));
+  }
+
+  get netToken(): BigDecimal {
+    let value = this.get("netToken");
+    return value.toBigDecimal();
+  }
+
+  set netToken(value: BigDecimal) {
+    this.set("netToken", Value.fromBigDecimal(value));
+  }
+
+  get netDerivedUsd(): BigDecimal {
+    let value = this.get("netDerivedUsd");
+    return value.toBigDecimal();
+  }
+
+  set netDerivedUsd(value: BigDecimal) {
+    this.set("netDerivedUsd", Value.fromBigDecimal(value));
+  }
+
+  get netLiqUnits(): BigDecimal {
+    let value = this.get("netLiqUnits");
+    return value.toBigDecimal();
+  }
+
+  set netLiqUnits(value: BigDecimal) {
+    this.set("netLiqUnits", Value.fromBigDecimal(value));
   }
 }
 
@@ -781,15 +848,6 @@ export class LiqAdd extends Entity {
     this.set("unitsIssued", Value.fromBigDecimal(value));
   }
 
-  get derivedSparta(): BigDecimal {
-    let value = this.get("derivedSparta");
-    return value.toBigDecimal();
-  }
-
-  set derivedSparta(value: BigDecimal) {
-    this.set("derivedSparta", Value.fromBigDecimal(value));
-  }
-
   get derivedUSD(): BigDecimal {
     let value = this.get("derivedUSD");
     return value.toBigDecimal();
@@ -926,15 +984,6 @@ export class LiqRemove extends Entity {
 
   set outputSparta(value: BigDecimal) {
     this.set("outputSparta", Value.fromBigDecimal(value));
-  }
-
-  get derivedSparta(): BigDecimal {
-    let value = this.get("derivedSparta");
-    return value.toBigDecimal();
-  }
-
-  set derivedSparta(value: BigDecimal) {
-    this.set("derivedSparta", Value.fromBigDecimal(value));
   }
 
   get derivedUSD(): BigDecimal {
@@ -1571,15 +1620,6 @@ export class Bond extends Entity {
 
   set unitsIssued(value: BigDecimal) {
     this.set("unitsIssued", Value.fromBigDecimal(value));
-  }
-
-  get derivedSparta(): BigDecimal {
-    let value = this.get("derivedSparta");
-    return value.toBigDecimal();
-  }
-
-  set derivedSparta(value: BigDecimal) {
-    this.set("derivedSparta", Value.fromBigDecimal(value));
   }
 
   get derivedUSD(): BigDecimal {

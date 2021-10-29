@@ -11,6 +11,7 @@ import {
   Member,
   MetricsGlobalDay,
   MetricsPoolDay,
+  Position,
 } from "../generated/schema";
 import {
   addr_poolFactory,
@@ -213,19 +214,19 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.save();
   }
   let poolid = poolAddr + "#" + dayStart.toString();
-  let pool = MetricsPoolDay.load(poolid);
-  if (!pool) {
-    pool = new MetricsPoolDay(poolid);
-    pool.timestamp = dayStart;
-    pool.pool = poolAddr;
-    pool.volSPARTA = ZERO_BD;
-    pool.volUSD = ZERO_BD;
-    pool.fees = ZERO_BD;
-    pool.feesUSD = ZERO_BD;
-    pool.txCount = ZERO_BI;
-    pool.tvlSPARTA = poolObj.tvlSPARTA;
-    pool.tvlUSD = poolObj.tvlUSD;
-    pool.save();
+  let metricPool = MetricsPoolDay.load(poolid);
+  if (!metricPool) {
+    metricPool = new MetricsPoolDay(poolid);
+    metricPool.timestamp = dayStart;
+    metricPool.pool = poolAddr;
+    metricPool.volSPARTA = ZERO_BD;
+    metricPool.volUSD = ZERO_BD;
+    metricPool.fees = ZERO_BD;
+    metricPool.feesUSD = ZERO_BD;
+    metricPool.txCount = ZERO_BI;
+    metricPool.tvlSPARTA = poolObj.tvlSPARTA;
+    metricPool.tvlUSD = poolObj.tvlUSD;
+    metricPool.save();
     sync(Address.fromString(poolAddr));
   }
 }
@@ -246,13 +247,25 @@ export function checkMember(memberAddr: string): void {
   if (!member) {
     member = new Member(memberAddr);
     member.fees = ZERO_BD;
-    member.liqNetSparta = ZERO_BD;
-    member.liqNetUSD = ZERO_BD;
+    member.netDerivedUsd = ZERO_BD;
     member.netHarvestSparta = ZERO_BD;
-    member.netHarvestUSD = ZERO_BD;
-    member.netRealisedSparta = ZERO_BD;
-    member.netRealisedUSD = ZERO_BD;
+    member.netHarvestUsd = ZERO_BD;
     member.save();
+  }
+}
+
+export function checkPosition(memberAddr: string, poolAddr: string): void {
+  let positionId = memberAddr + "#" + poolAddr;
+  let position = Position.load(positionId);
+  if (!position) {
+    position = new Position(positionId);
+    position.member = memberAddr;
+    position.pool = poolAddr;
+    position.netSparta = ZERO_BD;
+    position.netToken = ZERO_BD;
+    position.netDerivedUsd = ZERO_BD;
+    position.netLiqUnits = ZERO_BD;
+    position.save();
   }
 }
 
