@@ -405,13 +405,40 @@ export class Member extends Entity {
     this.set("fees", Value.fromBigDecimal(value));
   }
 
-  get netDerivedUsd(): BigDecimal {
-    let value = this.get("netDerivedUsd");
+  get netAddSparta(): BigDecimal {
+    let value = this.get("netAddSparta");
     return value.toBigDecimal();
   }
 
-  set netDerivedUsd(value: BigDecimal) {
-    this.set("netDerivedUsd", Value.fromBigDecimal(value));
+  set netAddSparta(value: BigDecimal) {
+    this.set("netAddSparta", Value.fromBigDecimal(value));
+  }
+
+  get netRemSparta(): BigDecimal {
+    let value = this.get("netRemSparta");
+    return value.toBigDecimal();
+  }
+
+  set netRemSparta(value: BigDecimal) {
+    this.set("netRemSparta", Value.fromBigDecimal(value));
+  }
+
+  get netAddUsd(): BigDecimal {
+    let value = this.get("netAddUsd");
+    return value.toBigDecimal();
+  }
+
+  set netAddUsd(value: BigDecimal) {
+    this.set("netAddUsd", Value.fromBigDecimal(value));
+  }
+
+  get netRemUsd(): BigDecimal {
+    let value = this.get("netRemUsd");
+    return value.toBigDecimal();
+  }
+
+  set netRemUsd(value: BigDecimal) {
+    this.set("netRemUsd", Value.fromBigDecimal(value));
   }
 
   get netHarvestSparta(): BigDecimal {
@@ -553,31 +580,58 @@ export class Position extends Entity {
     this.set("pool", Value.fromString(value));
   }
 
-  get netSparta(): BigDecimal {
-    let value = this.get("netSparta");
+  get netAddSparta(): BigDecimal {
+    let value = this.get("netAddSparta");
     return value.toBigDecimal();
   }
 
-  set netSparta(value: BigDecimal) {
-    this.set("netSparta", Value.fromBigDecimal(value));
+  set netAddSparta(value: BigDecimal) {
+    this.set("netAddSparta", Value.fromBigDecimal(value));
   }
 
-  get netToken(): BigDecimal {
-    let value = this.get("netToken");
+  get netRemSparta(): BigDecimal {
+    let value = this.get("netRemSparta");
     return value.toBigDecimal();
   }
 
-  set netToken(value: BigDecimal) {
-    this.set("netToken", Value.fromBigDecimal(value));
+  set netRemSparta(value: BigDecimal) {
+    this.set("netRemSparta", Value.fromBigDecimal(value));
   }
 
-  get netDerivedUsd(): BigDecimal {
-    let value = this.get("netDerivedUsd");
+  get netAddToken(): BigDecimal {
+    let value = this.get("netAddToken");
     return value.toBigDecimal();
   }
 
-  set netDerivedUsd(value: BigDecimal) {
-    this.set("netDerivedUsd", Value.fromBigDecimal(value));
+  set netAddToken(value: BigDecimal) {
+    this.set("netAddToken", Value.fromBigDecimal(value));
+  }
+
+  get netRemToken(): BigDecimal {
+    let value = this.get("netRemToken");
+    return value.toBigDecimal();
+  }
+
+  set netRemToken(value: BigDecimal) {
+    this.set("netRemToken", Value.fromBigDecimal(value));
+  }
+
+  get netAddUsd(): BigDecimal {
+    let value = this.get("netAddUsd");
+    return value.toBigDecimal();
+  }
+
+  set netAddUsd(value: BigDecimal) {
+    this.set("netAddUsd", Value.fromBigDecimal(value));
+  }
+
+  get netRemUsd(): BigDecimal {
+    let value = this.get("netRemUsd");
+    return value.toBigDecimal();
+  }
+
+  set netRemUsd(value: BigDecimal) {
+    this.set("netRemUsd", Value.fromBigDecimal(value));
   }
 
   get netLiqUnits(): BigDecimal {

@@ -73,15 +73,15 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   liqAdd.member = memberAddr;
   liqAdd.save();
   let member = Member.load(memberAddr);
-  member.netDerivedUsd = member.netDerivedUsd.minus(derivedUsd);
+  member.netAddUsd = member.netAddUsd.plus(derivedUsd);
   member.save();
 
   let positionId = memberAddr + "#" + poolAddress;
   checkPosition(memberAddr, poolAddress);
   let position = Position.load(positionId);
-  position.netSparta = position.netSparta.minus(inputBase);
-  position.netToken = position.netToken.minus(inputToken);
-  position.netDerivedUsd = position.netDerivedUsd.minus(derivedUsd);
+  position.netAddSparta = position.netAddSparta.plus(inputBase);
+  position.netAddToken = position.netAddToken.plus(inputToken);
+  position.netAddUsd = position.netAddUsd.plus(derivedUsd);
   position.netLiqUnits = position.netLiqUnits.plus(unitsIssued);
   position.save();
 
@@ -129,14 +129,14 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   liqRemove.member = memberAddr;
   liqRemove.save();
   let member = Member.load(memberAddr);
-  member.netDerivedUsd = member.netDerivedUsd.plus(derivedUsd);
+  member.netRemUsd = member.netRemUsd.plus(derivedUsd);
   member.save();
 
   checkPosition(memberAddr, poolAddress);
   let position = Position.load(memberAddr + "#" + poolAddress);
-  position.netSparta = position.netSparta.plus(outputBase);
-  position.netToken = position.netToken.plus(outputToken);
-  position.netDerivedUsd = position.netDerivedUsd.plus(derivedUsd);
+  position.netRemSparta = position.netRemSparta.plus(outputBase);
+  position.netRemToken = position.netRemToken.plus(outputToken);
+  position.netRemUsd = position.netRemUsd.plus(derivedUsd);
   position.netLiqUnits = position.netLiqUnits.minus(inputUnits);
   position.save();
 

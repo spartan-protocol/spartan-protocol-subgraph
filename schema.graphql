@@ -42,7 +42,10 @@ type Pool @entity {
 type Member @entity {
   id: ID! # Member's wallet address
   fees: BigDecimal! # Slip fees paid into the pools
-  netDerivedUsd: BigDecimal! # NET liq position derived in USD (realised, exc. harvest)
+  netAddSparta: BigDecimal! # NET liq adds derived in SPARTA (realised, exc. harvest)
+  netRemSparta: BigDecimal! # NET liq removed derived in SPARTA (realised, exc. harvest)
+  netAddUsd: BigDecimal! # NET liq adds derived in USD (realised, exc. harvest)
+  netRemUsd: BigDecimal! # NET liq removed derived in USD (realised, exc. harvest)
   netHarvestSparta: BigDecimal! # Tally of SPARTA harvested
   netHarvestUsd: BigDecimal! # Tally of SPARTA harvested derived in USD
   liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
@@ -59,9 +62,12 @@ type Position @entity {
   id: ID! # Member's wallet address + Pool Address
   member: Member!
   pool: Pool!
-  netSparta: BigDecimal! # NET liq position in SPARTA (realised)
-  netToken: BigDecimal! # NET liq position in TOKEN (realised)
-  netDerivedUsd: BigDecimal! # NET liq position derived in USD (realised)
+  netAddSparta: BigDecimal! # NET liq adds in SPARTA (realised)
+  netRemSparta: BigDecimal! # NET liq removed in SPARTA (realised)
+  netAddToken: BigDecimal! # NET liq adds in TOKEN (realised)
+  netRemToken: BigDecimal! # NET liq removed in TOKEN (realised)
+  netAddUsd: BigDecimal! # NET liq adds derived in USD (realised)
+  netRemUsd: BigDecimal! # NET liq removed derived in USD (realised)
   netLiqUnits: BigDecimal! # NET liq tokens
 }
 

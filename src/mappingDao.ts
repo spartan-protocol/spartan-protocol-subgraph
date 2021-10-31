@@ -80,13 +80,13 @@ export function handleBond(event: DepositAsset): void {
   bond.member = owner;
   bond.save();
   let member = Member.load(owner);
-  member.netDerivedUsd = member.netDerivedUsd.minus(derivedUsd);
+  member.netAddUsd = member.netAddUsd.plus(derivedUsd);
   member.save();
 
   checkPosition(owner, poolAddress);
   let position = Position.load(owner + "#" + poolAddress);
-  position.netToken = position.netToken.minus(inputToken);
-  position.netDerivedUsd = position.netDerivedUsd.minus(derivedUsd);
+  position.netAddToken = position.netAddToken.plus(inputToken);
+  position.netAddUsd = position.netAddUsd.plus(derivedUsd);
   position.netLiqUnits = position.netLiqUnits.plus(unitsIssued);
   position.save();
 

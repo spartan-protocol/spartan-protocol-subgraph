@@ -247,7 +247,10 @@ export function checkMember(memberAddr: string): void {
   if (!member) {
     member = new Member(memberAddr);
     member.fees = ZERO_BD;
-    member.netDerivedUsd = ZERO_BD;
+    member.netAddSparta = ZERO_BD;
+    member.netRemSparta = ZERO_BD;
+    member.netAddUsd = ZERO_BD;
+    member.netRemUsd = ZERO_BD;
     member.netHarvestSparta = ZERO_BD;
     member.netHarvestUsd = ZERO_BD;
     member.save();
@@ -261,9 +264,12 @@ export function checkPosition(memberAddr: string, poolAddr: string): void {
     position = new Position(positionId);
     position.member = memberAddr;
     position.pool = poolAddr;
-    position.netSparta = ZERO_BD;
-    position.netToken = ZERO_BD;
-    position.netDerivedUsd = ZERO_BD;
+    position.netAddSparta = ZERO_BD;
+    position.netRemSparta = ZERO_BD;
+    position.netAddToken = ZERO_BD;
+    position.netRemToken = ZERO_BD;
+    position.netAddUsd = ZERO_BD;
+    position.netRemUsd = ZERO_BD;
     position.netLiqUnits = ZERO_BD;
     position.save();
   }
