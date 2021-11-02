@@ -52,9 +52,12 @@ dataSources:
         - Member
         - DepositAsset
         - Position
+        - Pool
       abis:
         - name: Dao
           file: ./abis/Dao.json
+        - name: Pool
+          file: ./abis/Pool.json
       eventHandlers:
         - event: Harvest(indexed address,uint256)
           handler: handleHarvest
