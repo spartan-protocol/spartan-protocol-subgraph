@@ -61,7 +61,7 @@ dataSources:
         - event: DepositAsset(indexed address,indexed address,indexed address,uint256,uint256)
           handler: handleBond
   - kind: ethereum/contract
-    name: Router
+    name: Router1
     network: bsc
     source:
       address: "0xfbcdd9270aa6f298851164b2b657eceaf88469be"
@@ -71,12 +71,32 @@ dataSources:
       kind: ethereum/events
       apiVersion: 0.0.4
       language: wasm/assemblyscript
-      file: Router\Router.wasm
+      file: Router1\Router1.wasm
       entities:
         - Pool
       abis:
         - name: Router
-          file: Router\abis\Router.json
+          file: Router1\abis\Router.json
+      eventHandlers:
+        - event: Dividend(address,uint256)
+          handler: handleDividend
+  - kind: ethereum/contract
+    name: Router2
+    network: bsc
+    source:
+      address: "0xf73d255d1E2b184cDb7ee0a8A064500eB3f6b352"
+      abi: Router
+      startBlock: 12291756
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: Router1\Router1.wasm
+      entities:
+        - Pool
+      abis:
+        - name: Router
+          file: Router2\abis\Router.json
       eventHandlers:
         - event: Dividend(address,uint256)
           handler: handleDividend

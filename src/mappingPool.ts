@@ -74,6 +74,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   liqAdd.save();
   let member = Member.load(memberAddr);
   member.netAddUsd = member.netAddUsd.plus(derivedUsd);
+  member.netAddSparta = member.netAddSparta.plus(derivedSparta);
   member.save();
 
   let positionId = memberAddr + "#" + poolAddress;
@@ -130,6 +131,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   liqRemove.save();
   let member = Member.load(memberAddr);
   member.netRemUsd = member.netRemUsd.plus(derivedUsd);
+  member.netRemSparta = member.netRemSparta.plus(derivedSparta);
   member.save();
 
   checkPosition(memberAddr, poolAddress);
