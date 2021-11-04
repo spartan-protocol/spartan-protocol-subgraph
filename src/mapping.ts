@@ -19,7 +19,7 @@ export function handleCreatePool(event: CreatePool): void {
     poolFactory = new PoolFactory(addr_poolFactory);
     poolFactory.poolCount = ZERO_BI;
     poolFactory.tokenCount = ZERO_BI;
-    poolFactory.spartaDerivedUSD = BigDecimal.fromString("600000000000000000");
+    poolFactory.spartaDerivedUSD = BigDecimal.fromString("0.6");
     poolFactory.tvlSPARTA = ZERO_BD;
     poolFactory.tvlUSD = ZERO_BD;
   }
