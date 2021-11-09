@@ -205,6 +205,9 @@ type MetricsPoolDay @entity {
   volUSD: BigDecimal! # Daily volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
+  incentives: BigDecimal! # Incentives paid into the pool (divis, realises etc)
+  incentivesUSD: BigDecimal!
+  incentives30Day: BigDecimal!
   txCount: BigInt! # Daily txns
   tvlSPARTA: BigDecimal!
   tvlUSD: BigDecimal!

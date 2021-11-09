@@ -1873,6 +1873,33 @@ export class MetricsPoolDay extends Entity {
     this.set("feesUSD", Value.fromBigDecimal(value));
   }
 
+  get incentives(): BigDecimal {
+    let value = this.get("incentives");
+    return value.toBigDecimal();
+  }
+
+  set incentives(value: BigDecimal) {
+    this.set("incentives", Value.fromBigDecimal(value));
+  }
+
+  get incentivesUSD(): BigDecimal {
+    let value = this.get("incentivesUSD");
+    return value.toBigDecimal();
+  }
+
+  set incentivesUSD(value: BigDecimal) {
+    this.set("incentivesUSD", Value.fromBigDecimal(value));
+  }
+
+  get incentives30Day(): BigDecimal {
+    let value = this.get("incentives30Day");
+    return value.toBigDecimal();
+  }
+
+  set incentives30Day(value: BigDecimal) {
+    this.set("incentives30Day", Value.fromBigDecimal(value));
+  }
+
   get txCount(): BigInt {
     let value = this.get("txCount");
     return value.toBigInt();

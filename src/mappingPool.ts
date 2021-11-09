@@ -211,7 +211,9 @@ export function handleSwapped(event: Swapped): void {
     swap.derivedSparta,
     swap.derivedUSD,
     fee,
-    fee.times(poolFactory.spartaDerivedUSD)
+    fee.times(poolFactory.spartaDerivedUSD),
+    ZERO_BD,
+    ZERO_BD
   );
 }
 

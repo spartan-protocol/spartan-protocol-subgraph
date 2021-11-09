@@ -1,7 +1,12 @@
 import { RealisePOL } from "../generated/Reserve2/Reserve";
 import { Pool, PoolFactory } from "../generated/schema";
 import { addr_poolFactory, ZERO_BD } from "./const";
-import { getDerivedSparta, updateSpartaPrice, updateTVL } from "./utils";
+import {
+  getDerivedSparta,
+  updateDayMetrics,
+  updateSpartaPrice,
+  updateTVL,
+} from "./utils";
 
 export function handleRealisePOL(event: RealisePOL): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
@@ -16,4 +21,14 @@ export function handleRealisePOL(event: RealisePOL): void {
   pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
   updateSpartaPrice();
   updateTVL(pool.id);
+  updateDayMetrics(
+    event.block.timestamp,
+    pool.id,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    derivedSparta,
+    derivedUSD
+  );
 }

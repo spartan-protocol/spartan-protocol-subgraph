@@ -1,7 +1,7 @@
 import { Dividend } from "../generated/Router/Router";
 import { Pool, PoolFactory } from "../generated/schema";
-import { addr_poolFactory } from "./const";
-import { updateSpartaPrice, updateTVL } from "./utils";
+import { addr_poolFactory, ZERO_BD } from "./const";
+import { updateDayMetrics, updateSpartaPrice, updateTVL } from "./utils";
 
 export function handleDividend(event: Dividend): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
@@ -17,4 +17,14 @@ export function handleDividend(event: Dividend): void {
   pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
   updateSpartaPrice();
   updateTVL(pool.id);
+  updateDayMetrics(
+    event.block.timestamp,
+    pool.id,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    derivedSparta,
+    derivedUSD
+  );
 }

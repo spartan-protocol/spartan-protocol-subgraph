@@ -171,15 +171,16 @@ export function updateDayMetrics(
   volSPARTA: BigDecimal,
   volUSD: BigDecimal,
   fees: BigDecimal,
-  feesUSD: BigDecimal
+  feesUSD: BigDecimal,
+  incentives: BigDecimal,
+  incentivesUSD: BigDecimal
 ): void {
-  // let dayStart = BigInt.fromI32(Math.floor(timestamp.toI32() / 86400) * 86400);
   let dayStart = timestamp.mod(BigInt.fromString("86400"));
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
   let poolid = poolAddr + "#" + dayStart.toString();
-  let pool = MetricsPoolDay.load(poolid);
+  let metricPool = MetricsPoolDay.load(poolid);
 
   global.volSPARTA = global.volSPARTA.plus(volSPARTA);
   global.volUSD = global.volUSD.plus(volUSD);
@@ -187,13 +188,17 @@ export function updateDayMetrics(
   global.feesUSD = global.feesUSD.plus(feesUSD);
   global.txCount = global.txCount.plus(ONE_BI);
 
-  pool.volSPARTA = pool.volSPARTA.plus(volSPARTA);
-  pool.volUSD = pool.volUSD.plus(volUSD);
-  pool.fees = pool.fees.plus(fees);
-  pool.feesUSD = pool.feesUSD.plus(feesUSD);
-  pool.txCount = pool.txCount.plus(ONE_BI);
+  metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
+  metricPool.volUSD = metricPool.volUSD.plus(volUSD);
+  metricPool.fees = metricPool.fees.plus(fees);
+  metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
+  metricPool.incentives = metricPool.incentives.plus(incentives);
+  metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
 
-  pool.save();
+  metricPool.incentives30Day = metricPool.incentives30Day.plus(incentives);
+  metricPool.txCount = metricPool.txCount.plus(ONE_BI);
+
+  metricPool.save();
   global.save();
 }
 
@@ -213,9 +218,24 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.tvlUSD = poolFactory.tvlUSD;
     global.save();
   }
+
   let poolid = poolAddr + "#" + dayStart.toString();
   let metricPool = MetricsPoolDay.load(poolid);
   if (!metricPool) {
+    let day = BigInt.fromString("86400");
+    let prevPoolId = poolAddr + "#" + dayStart.minus(day).toString();
+    let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
+    let prevIncentives = ZERO_BD;
+    if (metricPoolPrev) {
+      prevIncentives = metricPoolPrev.incentives30Day;
+      let month = BigInt.fromString("30");
+      let monthPoolId =
+        poolAddr + "#" + dayStart.minus(day.times(month)).toString();
+      let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
+      if (metricPoolMonth) {
+        prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+      }
+    }
     metricPool = new MetricsPoolDay(poolid);
     metricPool.timestamp = dayStart;
     metricPool.pool = poolAddr;
@@ -223,6 +243,9 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     metricPool.volUSD = ZERO_BD;
     metricPool.fees = ZERO_BD;
     metricPool.feesUSD = ZERO_BD;
+    metricPool.incentives = ZERO_BD;
+    metricPool.incentivesUSD = ZERO_BD;
+    metricPool.incentives30Day = prevIncentives;
     metricPool.txCount = ZERO_BI;
     metricPool.tvlSPARTA = poolObj.tvlSPARTA;
     metricPool.tvlUSD = poolObj.tvlUSD;
