@@ -35,8 +35,8 @@ type Pool @entity {
   liqAdds: [LiqAdd!]! @derivedFrom(field: "pool")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "pool")
   swaps: [Swap!]! @derivedFrom(field: "pool")
-  mintSynths: [MintSynth!]! @derivedFrom(field: "pool")
-  burnSynths: [BurnSynth!]! @derivedFrom(field: "pool")
+  forgeSynths: [ForgeSynth!]! @derivedFrom(field: "pool")
+  meltSynths: [MeltSynth!]! @derivedFrom(field: "pool")
 }
 
 type Member @entity {
@@ -51,8 +51,8 @@ type Member @entity {
   liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
   swaps: [Swap!]! @derivedFrom(field: "member")
-  mintSynths: [MintSynth!]! @derivedFrom(field: "member")
-  burnSynths: [BurnSynth!]! @derivedFrom(field: "member")
+  forgeSynths: [ForgeSynth!]! @derivedFrom(field: "member")
+  meltSynths: [MeltSynth!]! @derivedFrom(field: "member")
   harvests: [Harvest]! @derivedFrom(field: "member")
   bonds: [Bond]! @derivedFrom(field: "member")
   positions: [Position]! @derivedFrom(field: "member")
@@ -80,8 +80,8 @@ type Transaction @entity {
   liqAdds: [LiqAdd]! @derivedFrom(field: "transaction")
   liqRemoves: [LiqRemove]! @derivedFrom(field: "transaction")
   swaps: [Swap]! @derivedFrom(field: "transaction")
-  mintSynths: [MintSynth]! @derivedFrom(field: "transaction")
-  burnSynths: [BurnSynth]! @derivedFrom(field: "transaction")
+  forgeSynths: [ForgeSynth]! @derivedFrom(field: "transaction")
+  meltSynths: [MeltSynth]! @derivedFrom(field: "transaction")
   harvests: [Harvest]! @derivedFrom(field: "transaction")
   bonds: [Bond]! @derivedFrom(field: "transaction")
 }
@@ -132,7 +132,7 @@ type Swap @entity {
   derivedUSD: BigDecimal!
 }
 
-type MintSynth @entity {
+type ForgeSynth @entity {
   id: ID! # TxnHash + logIndex
   transaction: Transaction!
   logIndex: BigInt
@@ -146,7 +146,7 @@ type MintSynth @entity {
   derivedUSD: BigDecimal!
 }
 
-type BurnSynth @entity {
+type MeltSynth @entity {
   id: ID! # TxnHash + logIndex
   transaction: Transaction!
   logIndex: BigInt

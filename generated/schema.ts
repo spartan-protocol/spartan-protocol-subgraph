@@ -347,22 +347,22 @@ export class Pool extends Entity {
     this.set("swaps", Value.fromStringArray(value));
   }
 
-  get mintSynths(): Array<string> {
-    let value = this.get("mintSynths");
+  get forgeSynths(): Array<string> {
+    let value = this.get("forgeSynths");
     return value.toStringArray();
   }
 
-  set mintSynths(value: Array<string>) {
-    this.set("mintSynths", Value.fromStringArray(value));
+  set forgeSynths(value: Array<string>) {
+    this.set("forgeSynths", Value.fromStringArray(value));
   }
 
-  get burnSynths(): Array<string> {
-    let value = this.get("burnSynths");
+  get meltSynths(): Array<string> {
+    let value = this.get("meltSynths");
     return value.toStringArray();
   }
 
-  set burnSynths(value: Array<string>) {
-    this.set("burnSynths", Value.fromStringArray(value));
+  set meltSynths(value: Array<string>) {
+    this.set("meltSynths", Value.fromStringArray(value));
   }
 }
 
@@ -486,22 +486,22 @@ export class Member extends Entity {
     this.set("swaps", Value.fromStringArray(value));
   }
 
-  get mintSynths(): Array<string> {
-    let value = this.get("mintSynths");
+  get forgeSynths(): Array<string> {
+    let value = this.get("forgeSynths");
     return value.toStringArray();
   }
 
-  set mintSynths(value: Array<string>) {
-    this.set("mintSynths", Value.fromStringArray(value));
+  set forgeSynths(value: Array<string>) {
+    this.set("forgeSynths", Value.fromStringArray(value));
   }
 
-  get burnSynths(): Array<string> {
-    let value = this.get("burnSynths");
+  get meltSynths(): Array<string> {
+    let value = this.get("meltSynths");
     return value.toStringArray();
   }
 
-  set burnSynths(value: Array<string>) {
-    this.set("burnSynths", Value.fromStringArray(value));
+  set meltSynths(value: Array<string>) {
+    this.set("meltSynths", Value.fromStringArray(value));
   }
 
   get harvests(): Array<string | null> {
@@ -737,22 +737,22 @@ export class Transaction extends Entity {
     this.set("swaps", Value.fromStringArray(value));
   }
 
-  get mintSynths(): Array<string | null> {
-    let value = this.get("mintSynths");
+  get forgeSynths(): Array<string | null> {
+    let value = this.get("forgeSynths");
     return value.toStringArray();
   }
 
-  set mintSynths(value: Array<string | null>) {
-    this.set("mintSynths", Value.fromStringArray(value));
+  set forgeSynths(value: Array<string | null>) {
+    this.set("forgeSynths", Value.fromStringArray(value));
   }
 
-  get burnSynths(): Array<string | null> {
-    let value = this.get("burnSynths");
+  get meltSynths(): Array<string | null> {
+    let value = this.get("meltSynths");
     return value.toStringArray();
   }
 
-  set burnSynths(value: Array<string | null>) {
-    this.set("burnSynths", Value.fromStringArray(value));
+  set meltSynths(value: Array<string | null>) {
+    this.set("meltSynths", Value.fromStringArray(value));
   }
 
   get harvests(): Array<string | null> {
@@ -1197,7 +1197,7 @@ export class Swap extends Entity {
   }
 }
 
-export class MintSynth extends Entity {
+export class ForgeSynth extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -1205,17 +1205,17 @@ export class MintSynth extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save MintSynth entity without an ID");
+    assert(id !== null, "Cannot save ForgeSynth entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save MintSynth entity with non-string ID. " +
+      "Cannot save ForgeSynth entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("MintSynth", id.toString(), this);
+    store.set("ForgeSynth", id.toString(), this);
   }
 
-  static load(id: string): MintSynth | null {
-    return store.get("MintSynth", id) as MintSynth | null;
+  static load(id: string): ForgeSynth | null {
+    return store.get("ForgeSynth", id) as ForgeSynth | null;
   }
 
   get id(): string {
@@ -1326,7 +1326,7 @@ export class MintSynth extends Entity {
   }
 }
 
-export class BurnSynth extends Entity {
+export class MeltSynth extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -1334,17 +1334,17 @@ export class BurnSynth extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id !== null, "Cannot save BurnSynth entity without an ID");
+    assert(id !== null, "Cannot save MeltSynth entity without an ID");
     assert(
       id.kind == ValueKind.STRING,
-      "Cannot save BurnSynth entity with non-string ID. " +
+      "Cannot save MeltSynth entity with non-string ID. " +
         'Considering using .toHex() to convert the "id" to a string.'
     );
-    store.set("BurnSynth", id.toString(), this);
+    store.set("MeltSynth", id.toString(), this);
   }
 
-  static load(id: string): BurnSynth | null {
-    return store.get("BurnSynth", id) as BurnSynth | null;
+  static load(id: string): MeltSynth | null {
+    return store.get("MeltSynth", id) as MeltSynth | null;
   }
 
   get id(): string {

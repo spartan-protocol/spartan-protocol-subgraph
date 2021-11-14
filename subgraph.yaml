@@ -161,8 +161,8 @@ templates:
         - LiqAdd
         - LiqRemove
         - Swap
-        - MintSynth
-        - BurnSynth
+        - ForgeSynth
+        - MeltSynth
         - Position
       abis:
         - name: Pool

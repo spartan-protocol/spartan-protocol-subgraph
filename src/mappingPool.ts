@@ -14,6 +14,8 @@ import {
   Swap,
   Member,
   Position,
+  ForgeSynth,
+  MeltSynth,
 } from "../generated/schema";
 import { addr_poolFactory, preDiviEventCurateds, ZERO_BD } from "./const";
 import {
@@ -218,94 +220,91 @@ export function handleSwapped(event: Swapped): void {
 }
 
 export function handleMintSynth(event: MintSynth): void {
-  let poolAddress = event.address;
+  let poolFactory = PoolFactory.load(addr_poolFactory);
+  let poolAddress = event.address.toHexString();
+  let pool = Pool.load(poolAddress);
 
-  // let poolFactory = PoolFactory.load(addr_poolFactory);
-  // let poolAddress = event.address.toHexString();
-  // let pool = Pool.load(poolAddress);
+  let member = event.params.member.toHexString();
+  let inputBase = event.params.baseAmount.toBigDecimal();
+  let liqUnits = event.params.liqUnits.toBigDecimal();
+  let outputSynth = event.params.synthAmount.toBigDecimal();
 
-  // let member = event.params.member.toHexString();
-  // let inputBase = event.params.baseAmount.toBigDecimal();
-  // let liqUnits = event.params.liqUnits.toBigDecimal();
-  // let outputSynth = event.params.synthAmount.toBigDecimal();
-  // let fee = event.params.fee.toBigDecimal();
+  pool.baseAmount = pool.baseAmount.plus(inputBase);
+  pool.totalSupply = pool.totalSupply.plus(liqUnits);
+  pool.save();
 
-  // pool.baseAmount = pool.baseAmount.plus(inputBase);
-  // pool.totalSupply = pool.totalSupply.plus(liqUnits);
-  // pool.fees = pool.fees.plus(fee);
+  let transaction = loadTransaction(event);
+  let mintSynth = new ForgeSynth(
+    transaction.id.toString() + "#" + event.logIndex.toString()
+  );
+  mintSynth.transaction = transaction.id;
+  mintSynth.logIndex = event.logIndex;
+  mintSynth.timestamp = transaction.timestamp;
+  mintSynth.pool = pool.id;
+  mintSynth.token = pool.token0;
+  checkMember(member);
+  mintSynth.member = member;
+  mintSynth.origin = event.transaction.from;
+  mintSynth.inputSparta = inputBase;
+  mintSynth.mintedSynths = outputSynth;
+  mintSynth.derivedUSD = inputBase.times(poolFactory.spartaDerivedUSD);
+  mintSynth.save();
 
-  // let transaction = loadTransaction(event);
-  // let mintSynth = new MintSynth(
-  //   transaction.id.toString() + "#" + event.logIndex.toString()
-  // );
-  // mintSynth.transaction = transaction.id;
-  // mintSynth.logIndex = event.logIndex;
-  // mintSynth.timestamp = transaction.timestamp;
-  // mintSynth.pool = pool.id;
-  // mintSynth.token = pool.token0;
-  // checkMember(member);
-  // mintSynth.member = member;
-  // mintSynth.origin = event.transaction.from;
-  // mintSynth.inputSparta = inputBase;
-  // mintSynth.mintedSynths = outputSynth;
-  // mintSynth.derivedUSD = mintSynth.inputSparta.times(
-  //   poolFactory.spartaDerivedUSD
-  // );
-
-  // let memberLoaded = Member.load(member);
-  // memberLoaded.fees = memberLoaded.fees.plus(fee);
-
-  // pool.save();
-  // updateSpartaPrice();
-  // mintSynth.save();
-  // memberLoaded.save();
-  // updateTVL(); // ADD IN THE ARGS
-  // updateDayMetrics() // ADD IN THE ARGS
+  updateSpartaPrice();
+  updateTVL(pool.id);
+  updateDayMetrics(
+    transaction.timestamp,
+    pool.id,
+    inputBase,
+    inputBase.times(poolFactory.spartaDerivedUSD),
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD
+  );
 }
 
 export function handleBurnSynth(event: BurnSynth): void {
-  let poolAddress = event.address;
+  let poolFactory = PoolFactory.load(addr_poolFactory);
+  let poolAddress = event.address.toHexString();
+  let pool = Pool.load(poolAddress);
 
-  // let poolFactory = PoolFactory.load(addr_poolFactory);
-  // let poolAddress = event.address.toHexString();
-  // let pool = Pool.load(poolAddress);
+  let member = event.params.member.toHexString();
+  let inputSynth = event.params.synthAmount.toBigDecimal();
+  let liqUnits = event.params.liqUnits.toBigDecimal();
+  let outputBase = event.params.baseAmount.toBigDecimal();
 
-  // UNCOMMENT BELOW ONCE NEW POOL CONTRACT DEPLOYED WITH CHANGED EVENTS
-  // let member = event.params.member.toHexString();
-  // let inputSynth = event.params.synthAmount.toBigDecimal();
-  // let liqUnits = event.params.liqUnits.toBigDecimal();
-  // let outputBase = event.params.baseAmount.toBigDecimal();
-  // let fee = event.params.fee.toBigDecimal();
+  pool.totalSupply = pool.totalSupply.minus(liqUnits);
+  pool.baseAmount = pool.baseAmount.minus(outputBase);
 
-  // pool.totalSupply = pool.totalSupply.minus(liqUnits);
-  // pool.baseAmount = pool.baseAmount.minus(outputBase);
-  // pool.fees = pool.fees.plus(fee);
+  let transaction = loadTransaction(event);
+  let burnSynth = new MeltSynth(
+    transaction.id.toString() + "#" + event.logIndex.toString()
+  );
+  burnSynth.transaction = transaction.id;
+  burnSynth.logIndex = event.logIndex;
+  burnSynth.timestamp = transaction.timestamp;
+  burnSynth.pool = pool.id;
+  burnSynth.token = pool.token0;
+  checkMember(member);
+  burnSynth.member = member;
+  burnSynth.origin = event.transaction.from;
+  burnSynth.outputSparta = outputBase;
+  burnSynth.burnedSynths = inputSynth;
+  burnSynth.derivedUSD = outputBase.times(poolFactory.spartaDerivedUSD);
+  burnSynth.save();
 
-  // let transaction = loadTransaction(event);
-  // let burnSynth = new BurnSynth(
-  //   transaction.id.toString() + "#" + event.logIndex.toString()
-  // );
-  // burnSynth.transaction = transaction.id;
-  // burnSynth.logIndex = event.logIndex;
-  // burnSynth.timestamp = transaction.timestamp;
-  // burnSynth.pool = pool.id;
-  // burnSynth.token = pool.token0;
-  // checkMember(member);
-  // burnSynth.member = member;
-  // burnSynth.origin = event.transaction.from;
-  // burnSynth.outputSparta = outputBase;
-  // burnSynth.burnedSynths = inputSynth;
-  // burnSynth.derivedUSD = burnSynth.outputSparta.times(
-  //   poolFactory.spartaDerivedUSD
-  // );
-
-  // let memberLoaded = Member.load(member);
-  // memberLoaded.fees = memberLoaded.fees.plus(fee);
-
-  // pool.save();
-  // updateSpartaPrice();
-  // burnSynth.save();
-  // memberLoaded.save();
-  // updateTVL(); // ADD IN THE ARGS
-  // updateDayMetrics() // ADD IN THE ARGS
+  pool.save();
+  updateSpartaPrice();
+  updateTVL(pool.id);
+  updateDayMetrics(
+    transaction.timestamp,
+    pool.id,
+    outputBase,
+    outputBase.times(poolFactory.spartaDerivedUSD),
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD
+  );
 }
