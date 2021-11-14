@@ -57,10 +57,10 @@ export function handleBond(event: DepositAsset): void {
   let derivedSparta = getDerivedSparta(ZERO_BD, inputToken, pool.id);
   let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
 
-  pool.tokenAmount = pool.tokenAmount.plus(inputToken);
-  pool.totalSupply = pool.totalSupply.plus(unitsIssued);
-  pool.save();
-  sync(Address.fromString(poolAddress)); // Have to sync here as we dont track SPARTA amount going in
+  // pool.tokenAmount = pool.tokenAmount.plus(inputToken); // Emits normal addLiq event dont need this
+  // pool.totalSupply = pool.totalSupply.plus(unitsIssued); // Emits normal addLiq event dont need this
+  // pool.save(); // Emits normal addLiq event dont need this
+  // sync(Address.fromString(poolAddress)); // Have to sync here as we dont track SPARTA amount going in  // Emits normal addLiq event dont need this
 
   let transaction = loadTransaction(event);
   let bond = new Bond(
