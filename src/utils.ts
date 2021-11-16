@@ -15,6 +15,7 @@ import {
 } from "../generated/schema";
 import {
   addr_poolFactory,
+  ONE_BD,
   ONE_BI,
   stableCoins,
   ZERO_BD,
@@ -249,6 +250,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     metricPool.txCount = ZERO_BI;
     metricPool.tvlSPARTA = poolObj.tvlSPARTA;
     metricPool.tvlUSD = poolObj.tvlUSD;
+    metricPool.tokenPrice = getDerivedSparta(ZERO_BD, ONE_BD, poolAddr).times(poolFactory.spartaDerivedUSD);
     metricPool.save();
     sync(Address.fromString(poolAddr));
   }

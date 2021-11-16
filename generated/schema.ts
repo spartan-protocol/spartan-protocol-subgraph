@@ -1926,4 +1926,13 @@ export class MetricsPoolDay extends Entity {
   set tvlUSD(value: BigDecimal) {
     this.set("tvlUSD", Value.fromBigDecimal(value));
   }
+
+  get tokenPrice(): BigDecimal {
+    let value = this.get("tokenPrice");
+    return value.toBigDecimal();
+  }
+
+  set tokenPrice(value: BigDecimal) {
+    this.set("tokenPrice", Value.fromBigDecimal(value));
+  }
 }

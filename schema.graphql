@@ -211,4 +211,5 @@ type MetricsPoolDay @entity {
   txCount: BigInt! # Daily txns
   tvlSPARTA: BigDecimal!
   tvlUSD: BigDecimal!
+  tokenPrice: BigDecimal!
 }
