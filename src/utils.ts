@@ -243,6 +243,8 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.tvlUSD = poolFactory.tvlUSD;
     global.synthVaultHarvest = ZERO_BD;
     global.daoVaultHarvest = ZERO_BD;
+    global.synthVault30Day = prevSynthVault;
+    global.daoVault30Day = prevDaoVault;
     global.save();
   }
 
