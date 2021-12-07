@@ -215,6 +215,8 @@ export function handleSwapped(event: Swapped): void {
     fee,
     fee.times(poolFactory.spartaDerivedUSD),
     ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
     ZERO_BD
   );
 }
@@ -260,6 +262,8 @@ export function handleMintSynth(event: MintSynth): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
     ZERO_BD
   );
 }
@@ -302,6 +306,8 @@ export function handleBurnSynth(event: BurnSynth): void {
     pool.id,
     outputBase,
     outputBase.times(poolFactory.spartaDerivedUSD),
+    ZERO_BD,
+    ZERO_BD,
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,

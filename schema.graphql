@@ -195,6 +195,10 @@ type MetricsGlobalDay @entity {
   txCount: BigInt! # Daily txns
   tvlSPARTA: BigDecimal!
   tvlUSD: BigDecimal!
+  synthVaultHarvest: BigDecimal!
+  daoVaultHarvest: BigDecimal!
+  synthVault30Day: BigDecimal!
+  daoVault30Day: BigDecimal!
 }
 
 type MetricsPoolDay @entity {

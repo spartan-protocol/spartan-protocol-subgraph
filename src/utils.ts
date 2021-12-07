@@ -174,40 +174,64 @@ export function updateDayMetrics(
   fees: BigDecimal,
   feesUSD: BigDecimal,
   incentives: BigDecimal,
-  incentivesUSD: BigDecimal
+  incentivesUSD: BigDecimal,
+  synthVaultHarvest: BigDecimal,
+  daoVaultHarvest: BigDecimal
 ): void {
   let dayStart = timestamp.mod(BigInt.fromString("86400"));
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
-  let poolid = poolAddr + "#" + dayStart.toString();
-  let metricPool = MetricsPoolDay.load(poolid);
 
   global.volSPARTA = global.volSPARTA.plus(volSPARTA);
   global.volUSD = global.volUSD.plus(volUSD);
   global.fees = global.fees.plus(fees);
   global.feesUSD = global.feesUSD.plus(feesUSD);
   global.txCount = global.txCount.plus(ONE_BI);
+  global.synthVaultHarvest = global.synthVaultHarvest.plus(synthVaultHarvest);
+  global.daoVaultHarvest = global.daoVaultHarvest.plus(daoVaultHarvest);
+  global.synthVault30Day = global.synthVault30Day.plus(synthVaultHarvest);
+  global.daoVault30Day = global.daoVault30Day.plus(daoVaultHarvest);
 
-  metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
-  metricPool.volUSD = metricPool.volUSD.plus(volUSD);
-  metricPool.fees = metricPool.fees.plus(fees);
-  metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
-  metricPool.incentives = metricPool.incentives.plus(incentives);
-  metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
+  if (poolAddr) {
+    let poolid = poolAddr + "#" + dayStart.toString();
+    let metricPool = MetricsPoolDay.load(poolid);
+    metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
+    metricPool.volUSD = metricPool.volUSD.plus(volUSD);
+    metricPool.fees = metricPool.fees.plus(fees);
+    metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
+    metricPool.incentives = metricPool.incentives.plus(incentives);
+    metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
+    metricPool.incentives30Day = metricPool.incentives30Day.plus(incentives);
+    metricPool.txCount = metricPool.txCount.plus(ONE_BI);
+    metricPool.save();
+  }
 
-  metricPool.incentives30Day = metricPool.incentives30Day.plus(incentives);
-  metricPool.txCount = metricPool.txCount.plus(ONE_BI);
-
-  metricPool.save();
   global.save();
 }
 
 export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
-  let poolObj = Pool.load(poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
   if (!global) {
+    let day = BigInt.fromString("86400");
+    let prevGlobalId = dayStart.minus(day).toString();
+    let metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId);
+    let prevSynthVault = ZERO_BD;
+    let prevDaoVault = ZERO_BD;
+    if (metricGlobalPrev) {
+      prevSynthVault = metricGlobalPrev.synthVault30Day;
+      prevDaoVault = metricGlobalPrev.daoVault30Day;
+      let month = BigInt.fromString("30");
+      let monthGlobalId = dayStart.minus(day.times(month)).toString();
+      let metricGlobalMonth = MetricsGlobalDay.load(monthGlobalId);
+      if (metricGlobalMonth) {
+        prevSynthVault = prevSynthVault.minus(
+          metricGlobalMonth.synthVaultHarvest
+        );
+        prevDaoVault = prevDaoVault.minus(metricGlobalMonth.daoVaultHarvest);
+      }
+    }
     global = new MetricsGlobalDay(dayStart.toString());
     global.timestamp = dayStart;
     global.volSPARTA = ZERO_BD;
@@ -217,42 +241,49 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.txCount = ZERO_BI;
     global.tvlSPARTA = poolFactory.tvlSPARTA;
     global.tvlUSD = poolFactory.tvlUSD;
+    global.synthVaultHarvest = ZERO_BD;
+    global.daoVaultHarvest = ZERO_BD;
     global.save();
   }
 
-  let poolid = poolAddr + "#" + dayStart.toString();
-  let metricPool = MetricsPoolDay.load(poolid);
-  if (!metricPool) {
-    let day = BigInt.fromString("86400");
-    let prevPoolId = poolAddr + "#" + dayStart.minus(day).toString();
-    let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
-    let prevIncentives = ZERO_BD;
-    if (metricPoolPrev) {
-      prevIncentives = metricPoolPrev.incentives30Day;
-      let month = BigInt.fromString("30");
-      let monthPoolId =
-        poolAddr + "#" + dayStart.minus(day.times(month)).toString();
-      let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
-      if (metricPoolMonth) {
-        prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+  if (poolAddr) {
+    let poolObj = Pool.load(poolAddr);
+    let poolid = poolAddr + "#" + dayStart.toString();
+    let metricPool = MetricsPoolDay.load(poolid);
+    if (!metricPool) {
+      let day = BigInt.fromString("86400");
+      let prevPoolId = poolAddr + "#" + dayStart.minus(day).toString();
+      let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
+      let prevIncentives = ZERO_BD;
+      if (metricPoolPrev) {
+        prevIncentives = metricPoolPrev.incentives30Day;
+        let month = BigInt.fromString("30");
+        let monthPoolId =
+          poolAddr + "#" + dayStart.minus(day.times(month)).toString();
+        let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
+        if (metricPoolMonth) {
+          prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+        }
       }
+      metricPool = new MetricsPoolDay(poolid);
+      metricPool.timestamp = dayStart;
+      metricPool.pool = poolAddr;
+      metricPool.volSPARTA = ZERO_BD;
+      metricPool.volUSD = ZERO_BD;
+      metricPool.fees = ZERO_BD;
+      metricPool.feesUSD = ZERO_BD;
+      metricPool.incentives = ZERO_BD;
+      metricPool.incentivesUSD = ZERO_BD;
+      metricPool.incentives30Day = prevIncentives;
+      metricPool.txCount = ZERO_BI;
+      metricPool.tvlSPARTA = poolObj.tvlSPARTA;
+      metricPool.tvlUSD = poolObj.tvlUSD;
+      metricPool.tokenPrice = getDerivedSparta(ZERO_BD, ONE_BD, poolAddr).times(
+        poolFactory.spartaDerivedUSD
+      );
+      metricPool.save();
+      sync(Address.fromString(poolAddr));
     }
-    metricPool = new MetricsPoolDay(poolid);
-    metricPool.timestamp = dayStart;
-    metricPool.pool = poolAddr;
-    metricPool.volSPARTA = ZERO_BD;
-    metricPool.volUSD = ZERO_BD;
-    metricPool.fees = ZERO_BD;
-    metricPool.feesUSD = ZERO_BD;
-    metricPool.incentives = ZERO_BD;
-    metricPool.incentivesUSD = ZERO_BD;
-    metricPool.incentives30Day = prevIncentives;
-    metricPool.txCount = ZERO_BI;
-    metricPool.tvlSPARTA = poolObj.tvlSPARTA;
-    metricPool.tvlUSD = poolObj.tvlUSD;
-    metricPool.tokenPrice = getDerivedSparta(ZERO_BD, ONE_BD, poolAddr).times(poolFactory.spartaDerivedUSD);
-    metricPool.save();
-    sync(Address.fromString(poolAddr));
   }
 }
 

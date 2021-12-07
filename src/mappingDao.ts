@@ -15,6 +15,7 @@ import {
   getDerivedSparta,
   loadTransaction,
   sync,
+  updateDayMetrics,
   updateSpartaPrice,
   updateTVL,
 } from "./utils";
@@ -43,6 +44,19 @@ export function handleHarvest(event: Harvest): void {
   member.netHarvestSparta = member.netHarvestSparta.plus(harvested);
   member.netHarvestUsd = member.netHarvestUsd.plus(derivedUSD);
   member.save();
+
+  updateDayMetrics(
+    transaction.timestamp,
+    null,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    harvested
+  );
 }
 
 export function handleBond(event: DepositAsset): void {

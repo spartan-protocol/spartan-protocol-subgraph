@@ -143,6 +143,26 @@ dataSources:
       eventHandlers:
         - event: RealisePOL(address,uint256)
           handler: handleRealisePOL
+  - kind: ethereum/contract
+    name: SynthVault
+    network: bsc
+    source:
+      address: "0xa6C3288C18505D134445cB4Fe8499da22002F1E0"
+      abi: SynthVault
+      startBlock: 12570501
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      file: ./src/mappingSynthVault.ts
+      entities:
+        - MetricsGlobalDay
+      abis:
+        - name: SynthVault
+          file: ./abis/SynthVault.json
+      eventHandlers:
+        - event: MemberHarvests(indexed address,indexed address,uint256)
+          handler: handleMemberHarvests
 templates:
   - kind: ethereum/contract
     name: Pool

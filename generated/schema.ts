@@ -1787,6 +1787,42 @@ export class MetricsGlobalDay extends Entity {
   set tvlUSD(value: BigDecimal) {
     this.set("tvlUSD", Value.fromBigDecimal(value));
   }
+
+  get synthVaultHarvest(): BigDecimal {
+    let value = this.get("synthVaultHarvest");
+    return value.toBigDecimal();
+  }
+
+  set synthVaultHarvest(value: BigDecimal) {
+    this.set("synthVaultHarvest", Value.fromBigDecimal(value));
+  }
+
+  get daoVaultHarvest(): BigDecimal {
+    let value = this.get("daoVaultHarvest");
+    return value.toBigDecimal();
+  }
+
+  set daoVaultHarvest(value: BigDecimal) {
+    this.set("daoVaultHarvest", Value.fromBigDecimal(value));
+  }
+
+  get synthVault30Day(): BigDecimal {
+    let value = this.get("synthVault30Day");
+    return value.toBigDecimal();
+  }
+
+  set synthVault30Day(value: BigDecimal) {
+    this.set("synthVault30Day", Value.fromBigDecimal(value));
+  }
+
+  get daoVault30Day(): BigDecimal {
+    let value = this.get("daoVault30Day");
+    return value.toBigDecimal();
+  }
+
+  set daoVault30Day(value: BigDecimal) {
+    this.set("daoVault30Day", Value.fromBigDecimal(value));
+  }
 }
 
 export class MetricsPoolDay extends Entity {
