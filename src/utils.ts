@@ -12,6 +12,7 @@ import {
   MetricsGlobalDay,
   MetricsPoolDay,
   Position,
+  SynthPosition,
 } from "../generated/schema";
 import {
   addr_poolFactory,
@@ -200,6 +201,7 @@ export function updateDayMetrics(
     metricPool.volUSD = metricPool.volUSD.plus(volUSD);
     metricPool.fees = metricPool.fees.plus(fees);
     metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
+    metricPool.fees30Day = metricPool.fees30Day.plus(fees);
     metricPool.incentives = metricPool.incentives.plus(incentives);
     metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
     metricPool.incentives30Day = metricPool.incentives30Day.plus(incentives);
@@ -256,14 +258,17 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
       let day = BigInt.fromString("86400");
       let prevPoolId = poolAddr + "#" + dayStart.minus(day).toString();
       let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
+      let prevFees = ZERO_BD;
       let prevIncentives = ZERO_BD;
       if (metricPoolPrev) {
+        prevFees = metricPoolPrev.fees30Day;
         prevIncentives = metricPoolPrev.incentives30Day;
         let month = BigInt.fromString("30");
         let monthPoolId =
           poolAddr + "#" + dayStart.minus(day.times(month)).toString();
         let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
         if (metricPoolMonth) {
+          prevFees = prevFees.minus(metricPoolMonth.fees);
           prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
         }
       }
@@ -274,6 +279,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
       metricPool.volUSD = ZERO_BD;
       metricPool.fees = ZERO_BD;
       metricPool.feesUSD = ZERO_BD;
+      metricPool.fees30Day = ZERO_BD;
       metricPool.incentives = ZERO_BD;
       metricPool.incentivesUSD = ZERO_BD;
       metricPool.incentives30Day = prevIncentives;
@@ -311,6 +317,12 @@ export function checkMember(memberAddr: string): void {
     member.netRemUsd = ZERO_BD;
     member.netHarvestSparta = ZERO_BD;
     member.netHarvestUsd = ZERO_BD;
+    member.netForgeSparta = ZERO_BD;
+    member.netForgeUsd = ZERO_BD;
+    member.netMeltSparta = ZERO_BD;
+    member.netMeltUsd = ZERO_BD;
+    member.netSynthHarvestSparta = ZERO_BD;
+    member.netSynthHarvestUsd = ZERO_BD;
     member.save();
   }
 }
@@ -330,6 +342,25 @@ export function checkPosition(memberAddr: string, poolAddr: string): void {
     position.netRemUsd = ZERO_BD;
     position.netLiqUnits = ZERO_BD;
     position.save();
+  }
+}
+
+export function checkSynthPosition(
+  memberAddr: string,
+  synthAddr: string
+): void {
+  let positionId = memberAddr + "#" + synthAddr;
+  let synthPosition = SynthPosition.load(positionId);
+  if (!synthPosition) {
+    synthPosition = new SynthPosition(positionId);
+    synthPosition.member = memberAddr;
+    synthPosition.netForgeSparta = ZERO_BD;
+    synthPosition.netForgeUsd = ZERO_BD;
+    synthPosition.netMeltSparta = ZERO_BD;
+    synthPosition.netMeltUsd = ZERO_BD;
+    synthPosition.netSynthHarvestSparta = ZERO_BD;
+    synthPosition.netSynthHarvestUsd = ZERO_BD;
+    synthPosition.save();
   }
 }
 

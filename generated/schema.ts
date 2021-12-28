@@ -459,6 +459,60 @@ export class Member extends Entity {
     this.set("netHarvestUsd", Value.fromBigDecimal(value));
   }
 
+  get netForgeSparta(): BigDecimal {
+    let value = this.get("netForgeSparta");
+    return value.toBigDecimal();
+  }
+
+  set netForgeSparta(value: BigDecimal) {
+    this.set("netForgeSparta", Value.fromBigDecimal(value));
+  }
+
+  get netForgeUsd(): BigDecimal {
+    let value = this.get("netForgeUsd");
+    return value.toBigDecimal();
+  }
+
+  set netForgeUsd(value: BigDecimal) {
+    this.set("netForgeUsd", Value.fromBigDecimal(value));
+  }
+
+  get netMeltSparta(): BigDecimal {
+    let value = this.get("netMeltSparta");
+    return value.toBigDecimal();
+  }
+
+  set netMeltSparta(value: BigDecimal) {
+    this.set("netMeltSparta", Value.fromBigDecimal(value));
+  }
+
+  get netMeltUsd(): BigDecimal {
+    let value = this.get("netMeltUsd");
+    return value.toBigDecimal();
+  }
+
+  set netMeltUsd(value: BigDecimal) {
+    this.set("netMeltUsd", Value.fromBigDecimal(value));
+  }
+
+  get netSynthHarvestSparta(): BigDecimal {
+    let value = this.get("netSynthHarvestSparta");
+    return value.toBigDecimal();
+  }
+
+  set netSynthHarvestSparta(value: BigDecimal) {
+    this.set("netSynthHarvestSparta", Value.fromBigDecimal(value));
+  }
+
+  get netSynthHarvestUsd(): BigDecimal {
+    let value = this.get("netSynthHarvestUsd");
+    return value.toBigDecimal();
+  }
+
+  set netSynthHarvestUsd(value: BigDecimal) {
+    this.set("netSynthHarvestUsd", Value.fromBigDecimal(value));
+  }
+
   get liqAdds(): Array<string> {
     let value = this.get("liqAdds");
     return value.toStringArray();
@@ -529,6 +583,15 @@ export class Member extends Entity {
 
   set positions(value: Array<string | null>) {
     this.set("positions", Value.fromStringArray(value));
+  }
+
+  get synthPositions(): Array<string | null> {
+    let value = this.get("synthPositions");
+    return value.toStringArray();
+  }
+
+  set synthPositions(value: Array<string | null>) {
+    this.set("synthPositions", Value.fromStringArray(value));
   }
 }
 
@@ -641,6 +704,100 @@ export class Position extends Entity {
 
   set netLiqUnits(value: BigDecimal) {
     this.set("netLiqUnits", Value.fromBigDecimal(value));
+  }
+}
+
+export class SynthPosition extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save SynthPosition entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save SynthPosition entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("SynthPosition", id.toString(), this);
+  }
+
+  static load(id: string): SynthPosition | null {
+    return store.get("SynthPosition", id) as SynthPosition | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get member(): string {
+    let value = this.get("member");
+    return value.toString();
+  }
+
+  set member(value: string) {
+    this.set("member", Value.fromString(value));
+  }
+
+  get netForgeSparta(): BigDecimal {
+    let value = this.get("netForgeSparta");
+    return value.toBigDecimal();
+  }
+
+  set netForgeSparta(value: BigDecimal) {
+    this.set("netForgeSparta", Value.fromBigDecimal(value));
+  }
+
+  get netForgeUsd(): BigDecimal {
+    let value = this.get("netForgeUsd");
+    return value.toBigDecimal();
+  }
+
+  set netForgeUsd(value: BigDecimal) {
+    this.set("netForgeUsd", Value.fromBigDecimal(value));
+  }
+
+  get netMeltSparta(): BigDecimal {
+    let value = this.get("netMeltSparta");
+    return value.toBigDecimal();
+  }
+
+  set netMeltSparta(value: BigDecimal) {
+    this.set("netMeltSparta", Value.fromBigDecimal(value));
+  }
+
+  get netMeltUsd(): BigDecimal {
+    let value = this.get("netMeltUsd");
+    return value.toBigDecimal();
+  }
+
+  set netMeltUsd(value: BigDecimal) {
+    this.set("netMeltUsd", Value.fromBigDecimal(value));
+  }
+
+  get netSynthHarvestSparta(): BigDecimal {
+    let value = this.get("netSynthHarvestSparta");
+    return value.toBigDecimal();
+  }
+
+  set netSynthHarvestSparta(value: BigDecimal) {
+    this.set("netSynthHarvestSparta", Value.fromBigDecimal(value));
+  }
+
+  get netSynthHarvestUsd(): BigDecimal {
+    let value = this.get("netSynthHarvestUsd");
+    return value.toBigDecimal();
+  }
+
+  set netSynthHarvestUsd(value: BigDecimal) {
+    this.set("netSynthHarvestUsd", Value.fromBigDecimal(value));
   }
 }
 
@@ -1907,6 +2064,15 @@ export class MetricsPoolDay extends Entity {
 
   set feesUSD(value: BigDecimal) {
     this.set("feesUSD", Value.fromBigDecimal(value));
+  }
+
+  get fees30Day(): BigDecimal {
+    let value = this.get("fees30Day");
+    return value.toBigDecimal();
+  }
+
+  set fees30Day(value: BigDecimal) {
+    this.set("fees30Day", Value.fromBigDecimal(value));
   }
 
   get incentives(): BigDecimal {

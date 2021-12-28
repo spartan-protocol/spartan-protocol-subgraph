@@ -16,11 +16,13 @@ import {
   Position,
   ForgeSynth,
   MeltSynth,
+  SynthPosition,
 } from "../generated/schema";
 import { addr_poolFactory, preDiviEventCurateds, ZERO_BD } from "./const";
 import {
   checkMember,
   checkPosition,
+  checkSynthPosition,
   getDerivedSparta,
   loadTransaction,
   sync,
@@ -226,10 +228,13 @@ export function handleMintSynth(event: MintSynth): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
 
-  let member = event.params.member.toHexString();
+  let memberAddr = event.params.member.toHexString();
+  let synthAddress = event.params.synthAddress.toHexString();
   let inputBase = event.params.baseAmount.toBigDecimal();
   let liqUnits = event.params.liqUnits.toBigDecimal();
   let outputSynth = event.params.synthAmount.toBigDecimal();
+
+  let derivedUsd = inputBase.times(poolFactory.spartaDerivedUSD);
 
   pool.baseAmount = pool.baseAmount.plus(inputBase);
   pool.totalSupply = pool.totalSupply.plus(liqUnits);
@@ -244,13 +249,25 @@ export function handleMintSynth(event: MintSynth): void {
   mintSynth.timestamp = transaction.timestamp;
   mintSynth.pool = pool.id;
   mintSynth.token = pool.token0;
-  checkMember(member);
-  mintSynth.member = member;
+
+  checkMember(memberAddr);
+  mintSynth.member = memberAddr;
   mintSynth.origin = event.transaction.from;
   mintSynth.inputSparta = inputBase;
   mintSynth.mintedSynths = outputSynth;
-  mintSynth.derivedUSD = inputBase.times(poolFactory.spartaDerivedUSD);
+  mintSynth.derivedUSD = derivedUsd;
   mintSynth.save();
+
+  let member = Member.load(memberAddr);
+  member.netForgeSparta = member.netForgeSparta.plus(inputBase);
+  member.netForgeUsd = member.netForgeUsd.plus(derivedUsd);
+  member.save();
+
+  checkSynthPosition(memberAddr, synthAddress);
+  let synthPosition = SynthPosition.load(memberAddr + "#" + synthAddress);
+  synthPosition.netForgeSparta = synthPosition.netForgeSparta.plus(inputBase);
+  synthPosition.netForgeUsd = synthPosition.netForgeUsd.plus(derivedUsd);
+  synthPosition.save();
 
   updateSpartaPrice();
   updateTVL(pool.id);
@@ -258,7 +275,7 @@ export function handleMintSynth(event: MintSynth): void {
     transaction.timestamp,
     pool.id,
     inputBase,
-    inputBase.times(poolFactory.spartaDerivedUSD),
+    derivedUsd,
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
@@ -273,10 +290,12 @@ export function handleBurnSynth(event: BurnSynth): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
 
-  let member = event.params.member.toHexString();
+  let memberAddr = event.params.member.toHexString();
+  let synthAddress = event.params.synthAddress.toHexString();
   let inputSynth = event.params.synthAmount.toBigDecimal();
   let liqUnits = event.params.liqUnits.toBigDecimal();
   let outputBase = event.params.baseAmount.toBigDecimal();
+  let derivedUsd = outputBase.times(poolFactory.spartaDerivedUSD);
 
   pool.totalSupply = pool.totalSupply.minus(liqUnits);
   pool.baseAmount = pool.baseAmount.minus(outputBase);
@@ -290,13 +309,24 @@ export function handleBurnSynth(event: BurnSynth): void {
   burnSynth.timestamp = transaction.timestamp;
   burnSynth.pool = pool.id;
   burnSynth.token = pool.token0;
-  checkMember(member);
-  burnSynth.member = member;
+  checkMember(memberAddr);
+  burnSynth.member = memberAddr;
   burnSynth.origin = event.transaction.from;
   burnSynth.outputSparta = outputBase;
   burnSynth.burnedSynths = inputSynth;
-  burnSynth.derivedUSD = outputBase.times(poolFactory.spartaDerivedUSD);
+  burnSynth.derivedUSD = derivedUsd;
   burnSynth.save();
+
+  let member = Member.load(memberAddr);
+  member.netMeltSparta = member.netMeltSparta.plus(outputBase);
+  member.netMeltUsd = member.netMeltUsd.plus(derivedUsd);
+  member.save();
+
+  checkSynthPosition(memberAddr, synthAddress);
+  let synthPosition = SynthPosition.load(memberAddr + "#" + synthAddress);
+  synthPosition.netMeltSparta = synthPosition.netMeltSparta.plus(outputBase);
+  synthPosition.netMeltUsd = synthPosition.netMeltUsd.plus(derivedUsd);
+  synthPosition.save();
 
   pool.save();
   updateSpartaPrice();
@@ -305,7 +335,7 @@ export function handleBurnSynth(event: BurnSynth): void {
     transaction.timestamp,
     pool.id,
     outputBase,
-    outputBase.times(poolFactory.spartaDerivedUSD),
+    derivedUsd,
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,

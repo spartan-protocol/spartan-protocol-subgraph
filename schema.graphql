@@ -48,6 +48,12 @@ type Member @entity {
   netRemUsd: BigDecimal! # NET liq removed derived in USD (realised, exc. harvest)
   netHarvestSparta: BigDecimal! # Tally of SPARTA harvested
   netHarvestUsd: BigDecimal! # Tally of SPARTA harvested derived in USD
+  netForgeSparta: BigDecimal! # NET SPARTA swapped for Synth (realised)
+  netForgeUsd: BigDecimal! # NET swapped for Synth derived in USD (realised)
+  netMeltSparta: BigDecimal! # NET SPARTA received from melted Synths (realised)
+  netMeltUsd: BigDecimal! # NET derived USD received from melted synths (realised)
+  netSynthHarvestSparta: BigDecimal! # 
+  netSynthHarvestUsd: BigDecimal! # 
   liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
   liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
   swaps: [Swap!]! @derivedFrom(field: "member")
@@ -56,6 +62,7 @@ type Member @entity {
   harvests: [Harvest]! @derivedFrom(field: "member")
   bonds: [Bond]! @derivedFrom(field: "member")
   positions: [Position]! @derivedFrom(field: "member")
+  synthPositions: [SynthPosition]! @derivedFrom(field: "member")
 }
 
 type Position @entity {
@@ -69,6 +76,17 @@ type Position @entity {
   netAddUsd: BigDecimal! # NET liq adds derived in USD (realised)
   netRemUsd: BigDecimal! # NET liq removed derived in USD (realised)
   netLiqUnits: BigDecimal! # NET liq tokens
+}
+
+type SynthPosition @entity {
+  id: ID! # Member's wallet address + Synth Address
+  member: Member!
+  netForgeSparta: BigDecimal! # NET SPARTA swapped for Synth (realised)
+  netForgeUsd: BigDecimal! # NET swapped for Synth derived in USD (realised)
+  netMeltSparta: BigDecimal! # NET SPARTA received from melted Synths (realised)
+  netMeltUsd: BigDecimal! # NET derived USD received from melted synths (realised)
+  netSynthHarvestSparta: BigDecimal! # 
+  netSynthHarvestUsd: BigDecimal! # 
 }
 
 type Transaction @entity {
@@ -209,6 +227,7 @@ type MetricsPoolDay @entity {
   volUSD: BigDecimal! # Daily volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
+  fees30Day: BigDecimal!
   incentives: BigDecimal! # Incentives paid into the pool (divis, realises etc)
   incentivesUSD: BigDecimal!
   incentives30Day: BigDecimal!
