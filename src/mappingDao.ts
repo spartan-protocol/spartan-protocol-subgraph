@@ -1,11 +1,11 @@
-import { Address } from "@graphprotocol/graph-ts";
+// import { Address } from "@graphprotocol/graph-ts";
 import { DepositAsset, Harvest } from "../generated/Dao/Dao";
 import {
   PoolFactory,
-  Harvest as HarvestSchem,
+  // Harvest as HarvestSchem,
   Member,
   Pool,
-  Bond,
+  // Bond,
   Position,
 } from "../generated/schema";
 import { addr_poolFactory, ZERO_BD } from "./const";
@@ -13,8 +13,8 @@ import {
   checkMember,
   checkPosition,
   getDerivedSparta,
-  loadTransaction,
-  sync,
+  // loadTransaction,
+  // sync,
   updateDayMetrics,
   updateSpartaPrice,
   updateTVL,
@@ -26,19 +26,19 @@ export function handleHarvest(event: Harvest): void {
   let harvested = event.params.amount.toBigDecimal();
   let derivedUSD = harvested.times(poolFactory.spartaDerivedUSD);
 
-  let transaction = loadTransaction(event);
-  let harvest = new HarvestSchem(
-    transaction.id.toString() + "#" + event.logIndex.toString()
-  );
-  harvest.transaction = transaction.id;
-  harvest.logIndex = event.logIndex;
-  harvest.timestamp = transaction.timestamp;
+  // let transaction = loadTransaction(event);
+  // let harvest = new HarvestSchem(
+  //   transaction.id.toString() + "#" + event.logIndex.toString()
+  // );
+  // harvest.transaction = transaction.id;
+  // harvest.logIndex = event.logIndex;
+  // harvest.timestamp = transaction.timestamp;
   checkMember(owner);
-  harvest.member = owner;
-  harvest.origin = event.transaction.from;
-  harvest.derivedSparta = harvested;
-  harvest.derivedUSD = derivedUSD;
-  harvest.save();
+  // harvest.member = owner;
+  // harvest.origin = event.transaction.from;
+  // harvest.derivedSparta = harvested;
+  // harvest.derivedUSD = derivedUSD;
+  // harvest.save();
 
   let member = Member.load(owner);
   member.netHarvestSparta = member.netHarvestSparta.plus(harvested);
@@ -46,7 +46,7 @@ export function handleHarvest(event: Harvest): void {
   member.save();
 
   updateDayMetrics(
-    transaction.timestamp,
+    event.block.timestamp,
     null,
     ZERO_BD,
     ZERO_BD,
@@ -76,23 +76,23 @@ export function handleBond(event: DepositAsset): void {
   // pool.save(); // Emits normal addLiq event dont need this
   // sync(Address.fromString(poolAddress)); // Have to sync here as we dont track SPARTA amount going in  // Emits normal addLiq event dont need this
 
-  let transaction = loadTransaction(event);
-  let bond = new Bond(
-    transaction.id.toString() + "#" + event.logIndex.toString()
-  );
-  bond.transaction = transaction.id;
-  bond.logIndex = event.logIndex;
-  bond.timestamp = transaction.timestamp;
-  bond.pool = pool.id;
-  bond.token = pool.token0;
-  bond.origin = event.transaction.from;
-  bond.inputToken = inputToken;
-  bond.unitsIssued = unitsIssued;
-  bond.derivedUSD = derivedUsd;
+  // let transaction = loadTransaction(event);
+  // let bond = new Bond(
+  //   transaction.id.toString() + "#" + event.logIndex.toString()
+  // );
+  // bond.transaction = transaction.id;
+  // bond.logIndex = event.logIndex;
+  // bond.timestamp = transaction.timestamp;
+  // bond.pool = pool.id;
+  // bond.token = pool.token0;
+  // bond.origin = event.transaction.from;
+  // bond.inputToken = inputToken;
+  // bond.unitsIssued = unitsIssued;
+  // bond.derivedUSD = derivedUsd;
 
   checkMember(owner);
-  bond.member = owner;
-  bond.save();
+  // bond.member = owner;
+  // bond.save();
   let member = Member.load(owner);
   member.netAddUsd = member.netAddUsd.plus(derivedUsd);
   member.netAddSparta = member.netAddSparta.plus(derivedSparta);

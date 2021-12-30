@@ -32,11 +32,11 @@ type Pool @entity {
   stablecoin: Boolean! # If true; can be used for internally deriving USD pricing
   tvlSPARTA: BigDecimal!
   tvlUSD: BigDecimal!
-  liqAdds: [LiqAdd!]! @derivedFrom(field: "pool")
-  liqRemoves: [LiqRemove!]! @derivedFrom(field: "pool")
-  swaps: [Swap!]! @derivedFrom(field: "pool")
-  forgeSynths: [ForgeSynth!]! @derivedFrom(field: "pool")
-  meltSynths: [MeltSynth!]! @derivedFrom(field: "pool")
+  # liqAdds: [LiqAdd!]! @derivedFrom(field: "pool")
+  # liqRemoves: [LiqRemove!]! @derivedFrom(field: "pool")
+  # swaps: [Swap!]! @derivedFrom(field: "pool")
+  # forgeSynths: [ForgeSynth!]! @derivedFrom(field: "pool")
+  # meltSynths: [MeltSynth!]! @derivedFrom(field: "pool")
 }
 
 type Member @entity {
@@ -54,13 +54,13 @@ type Member @entity {
   netMeltUsd: BigDecimal! # NET derived USD received from melted synths (realised)
   netSynthHarvestSparta: BigDecimal! # 
   netSynthHarvestUsd: BigDecimal! # 
-  liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
-  liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
-  swaps: [Swap!]! @derivedFrom(field: "member")
-  forgeSynths: [ForgeSynth!]! @derivedFrom(field: "member")
-  meltSynths: [MeltSynth!]! @derivedFrom(field: "member")
-  harvests: [Harvest]! @derivedFrom(field: "member")
-  bonds: [Bond]! @derivedFrom(field: "member")
+  # liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
+  # liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
+  # swaps: [Swap!]! @derivedFrom(field: "member")
+  # forgeSynths: [ForgeSynth!]! @derivedFrom(field: "member")
+  # meltSynths: [MeltSynth!]! @derivedFrom(field: "member")
+  # harvests: [Harvest]! @derivedFrom(field: "member")
+  # bonds: [Bond]! @derivedFrom(field: "member")
   positions: [Position]! @derivedFrom(field: "member")
   synthPositions: [SynthPosition]! @derivedFrom(field: "member")
 }
@@ -89,119 +89,119 @@ type SynthPosition @entity {
   netSynthHarvestUsd: BigDecimal! # 
 }
 
-type Transaction @entity {
-  id: ID! # txn hash
-  blockNumber: BigInt! # block txn was included in
-  timestamp: BigInt! # timestamp txn was confirmed
-  gasUsed: BigInt! # gas used during txn execution
-  gasPrice: BigInt!
-  liqAdds: [LiqAdd]! @derivedFrom(field: "transaction")
-  liqRemoves: [LiqRemove]! @derivedFrom(field: "transaction")
-  swaps: [Swap]! @derivedFrom(field: "transaction")
-  forgeSynths: [ForgeSynth]! @derivedFrom(field: "transaction")
-  meltSynths: [MeltSynth]! @derivedFrom(field: "transaction")
-  harvests: [Harvest]! @derivedFrom(field: "transaction")
-  bonds: [Bond]! @derivedFrom(field: "transaction")
-}
+# type Transaction @entity {
+#   id: ID! # txn hash
+#   blockNumber: BigInt! # block txn was included in
+#   timestamp: BigInt! # timestamp txn was confirmed
+#   gasUsed: BigInt! # gas used during txn execution
+#   gasPrice: BigInt!
+#   liqAdds: [LiqAdd]! @derivedFrom(field: "transaction")
+#   liqRemoves: [LiqRemove]! @derivedFrom(field: "transaction")
+#   swaps: [Swap]! @derivedFrom(field: "transaction")
+#   forgeSynths: [ForgeSynth]! @derivedFrom(field: "transaction")
+#   meltSynths: [MeltSynth]! @derivedFrom(field: "transaction")
+#   harvests: [Harvest]! @derivedFrom(field: "transaction")
+#   bonds: [Bond]! @derivedFrom(field: "transaction")
+# }
 
-type LiqAdd @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  inputBase: BigDecimal!
-  inputToken: BigDecimal!
-  unitsIssued: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type LiqAdd @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   inputBase: BigDecimal!
+#   inputToken: BigDecimal!
+#   unitsIssued: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type LiqRemove @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  inputLPs: BigDecimal!
-  outputToken: BigDecimal!
-  outputSparta: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type LiqRemove @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   inputLPs: BigDecimal!
+#   outputToken: BigDecimal!
+#   outputSparta: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type Swap @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  fromSparta: Boolean!
-  input: BigDecimal!
-  output: BigDecimal!
-  derivedSparta: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type Swap @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   fromSparta: Boolean!
+#   input: BigDecimal!
+#   output: BigDecimal!
+#   derivedSparta: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type ForgeSynth @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  inputSparta: BigDecimal!
-  mintedSynths: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type ForgeSynth @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   inputSparta: BigDecimal!
+#   mintedSynths: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type MeltSynth @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  outputSparta: BigDecimal!
-  burnedSynths: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type MeltSynth @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   outputSparta: BigDecimal!
+#   burnedSynths: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type Harvest @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  member: Member!
-  origin: Bytes!
-  derivedSparta: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type Harvest @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   member: Member!
+#   origin: Bytes!
+#   derivedSparta: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
-type Bond @entity {
-  id: ID! # TxnHash + logIndex
-  transaction: Transaction!
-  logIndex: BigInt
-  timestamp: BigInt! # timestamp of transaction
-  pool: Pool!
-  token: Token!
-  member: Member!
-  origin: Bytes!
-  inputToken: BigDecimal!
-  unitsIssued: BigDecimal!
-  derivedUSD: BigDecimal!
-}
+# type Bond @entity {
+#   id: ID! # TxnHash + logIndex
+#   transaction: Transaction!
+#   logIndex: BigInt
+#   timestamp: BigInt! # timestamp of transaction
+#   pool: Pool!
+#   token: Token!
+#   member: Member!
+#   origin: Bytes!
+#   inputToken: BigDecimal!
+#   unitsIssued: BigDecimal!
+#   derivedUSD: BigDecimal!
+# }
 
 type MetricsGlobalDay @entity {
   id: ID! # Timestamp

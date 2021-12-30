@@ -5,7 +5,7 @@ import { iBEP20NameBytes } from "../generated/PoolFactory/iBEP20NameBytes";
 import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
 import {
   PoolFactory,
-  Transaction,
+  // Transaction,
   Pool,
   Token,
   Member,
@@ -106,18 +106,18 @@ export function isNullEthValue(value: string): boolean {
   );
 }
 
-export function loadTransaction(event: ethereum.Event): Transaction {
-  let transaction = Transaction.load(event.transaction.hash.toHexString());
-  if (transaction === null) {
-    transaction = new Transaction(event.transaction.hash.toHexString());
-  }
-  transaction.blockNumber = event.block.number;
-  transaction.timestamp = event.block.timestamp;
-  transaction.gasUsed = event.transaction.gasUsed;
-  transaction.gasPrice = event.transaction.gasPrice;
-  transaction.save();
-  return transaction as Transaction;
-}
+// export function loadTransaction(event: ethereum.Event): Transaction {
+//   let transaction = Transaction.load(event.transaction.hash.toHexString());
+//   if (transaction === null) {
+//     transaction = new Transaction(event.transaction.hash.toHexString());
+//   }
+//   transaction.blockNumber = event.block.number;
+//   transaction.timestamp = event.block.timestamp;
+//   transaction.gasUsed = event.transaction.gasUsed;
+//   transaction.gasPrice = event.transaction.gasPrice;
+//   transaction.save();
+//   return transaction as Transaction;
+// }
 
 export function getPoolAddr(tokenAddress: string): string {
   let poolAddress = "unknown";
@@ -279,7 +279,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
       metricPool.volUSD = ZERO_BD;
       metricPool.fees = ZERO_BD;
       metricPool.feesUSD = ZERO_BD;
-      metricPool.fees30Day = ZERO_BD;
+      metricPool.fees30Day = prevFees;
       metricPool.incentives = ZERO_BD;
       metricPool.incentivesUSD = ZERO_BD;
       metricPool.incentives30Day = prevIncentives;

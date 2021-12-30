@@ -47,10 +47,10 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappingDao.ts
       entities:
-        - Transaction
-        - Harvest
+        # - Transaction
+        # - Harvest
         - Member
-        - DepositAsset
+        # - DepositAsset
         - Position
         - Pool
       abis:
@@ -177,12 +177,12 @@ templates:
       entities:
         - Pool
         - Member
-        - Transaction
-        - LiqAdd
-        - LiqRemove
-        - Swap
-        - ForgeSynth
-        - MeltSynth
+        # - Transaction
+        # - LiqAdd
+        # - LiqRemove
+        # - Swap
+        # - ForgeSynth
+        # - MeltSynth
         - Position
       abis:
         - name: Pool

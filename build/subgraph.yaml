@@ -47,10 +47,7 @@ dataSources:
       language: wasm/assemblyscript
       file: Dao\Dao.wasm
       entities:
-        - Transaction
-        - Harvest
         - Member
-        - DepositAsset
         - Position
         - Pool
       abis:
@@ -177,12 +174,6 @@ templates:
       entities:
         - Pool
         - Member
-        - Transaction
-        - LiqAdd
-        - LiqRemove
-        - Swap
-        - ForgeSynth
-        - MeltSynth
         - Position
       abis:
         - name: Pool
