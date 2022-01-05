@@ -16,8 +16,11 @@ import {
 } from "../generated/schema";
 import {
   addr_poolFactory,
+  GENESIS_TIMESTAMP,
   ONE_BD,
   ONE_BI,
+  ONE_DAY,
+  ONE_MONTH,
   stableCoins,
   ZERO_BD,
   ZERO_BI,
@@ -179,7 +182,7 @@ export function updateDayMetrics(
   synthVaultHarvest: BigDecimal,
   daoVaultHarvest: BigDecimal
 ): void {
-  let dayStart = timestamp.mod(BigInt.fromString("86400"));
+  let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
@@ -216,16 +219,20 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
   let global = MetricsGlobalDay.load(dayStart.toString());
   if (!global) {
-    let day = BigInt.fromString("86400");
-    let prevGlobalId = dayStart.minus(day).toString();
+    let prevGlobalId = dayStart.minus(ONE_DAY).toString();
     let metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId);
+
+    if (!metricGlobalPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) { // Check if yesterday exists (and is not genesis day)
+      checkMetricsDay(BigInt.fromString(prevGlobalId), poolAddr); // If not genesis day & yesterday doesnt exist
+    }
+    metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId); // Load updated 'yesterday'
+
     let prevSynthVault = ZERO_BD;
     let prevDaoVault = ZERO_BD;
     if (metricGlobalPrev) {
       prevSynthVault = metricGlobalPrev.synthVault30Day;
       prevDaoVault = metricGlobalPrev.daoVault30Day;
-      let month = BigInt.fromString("30");
-      let monthGlobalId = dayStart.minus(day.times(month)).toString();
+      let monthGlobalId = dayStart.minus(ONE_DAY.times(ONE_MONTH)).toString();
       let metricGlobalMonth = MetricsGlobalDay.load(monthGlobalId);
       if (metricGlobalMonth) {
         prevSynthVault = prevSynthVault.minus(
@@ -249,23 +256,32 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.daoVault30Day = prevDaoVault;
     global.save();
   }
+  checkPoolMetricsDay(dayStart, poolAddr)
+}
 
+export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
+  let poolFactory = PoolFactory.load(addr_poolFactory);
   if (poolAddr) {
     let poolObj = Pool.load(poolAddr);
     let poolid = poolAddr + "#" + dayStart.toString();
     let metricPool = MetricsPoolDay.load(poolid);
     if (!metricPool) {
-      let day = BigInt.fromString("86400");
-      let prevPoolId = poolAddr + "#" + dayStart.minus(day).toString();
+      let prevDay = dayStart.minus(ONE_DAY)
+      let prevPoolId = poolAddr + "#" + prevDay.toString();
       let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
+
+      if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) { // Check if yesterday exists (and is not genesis day)
+        checkPoolMetricsDay(prevDay, poolAddr); // If not genesis day & yesterday doesnt exist
+      }
+      metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
+
       let prevFees = ZERO_BD;
       let prevIncentives = ZERO_BD;
       if (metricPoolPrev) {
         prevFees = metricPoolPrev.fees30Day;
         prevIncentives = metricPoolPrev.incentives30Day;
-        let month = BigInt.fromString("30");
         let monthPoolId =
-          poolAddr + "#" + dayStart.minus(day.times(month)).toString();
+          poolAddr + "#" + dayStart.minus(ONE_DAY.times(ONE_MONTH)).toString();
         let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
         if (metricPoolMonth) {
           prevFees = prevFees.minus(metricPoolMonth.fees);
@@ -290,7 +306,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
         poolFactory.spartaDerivedUSD
       );
       metricPool.save();
-      sync(Address.fromString(poolAddr));
+      // sync(Address.fromString(poolAddr)); // I SUSPECT THIS CALLS THE CURRENT BLOCK, NOT THE BLOCK THAT THE SUBGRAPH IS UP TO
     }
   }
 }
@@ -364,6 +380,7 @@ export function checkSynthPosition(
   }
 }
 
+// DOES THIS CALL THE CURRENT BLOCK? OR THE BLOCK THAT THE SUBGRAPH IS UP TO?
 export function sync(poolAddr: Address): void {
   let pool = Pool.load(poolAddr.toHexString());
   let contract = PoolGen.bind(poolAddr);
@@ -374,16 +391,17 @@ export function sync(poolAddr: Address): void {
   pool.save();
 }
 
-export function syncBoth(poolAddr: Address): void {
-  let pool = Pool.load(poolAddr.toHexString());
-  let contract = PoolGen.bind(poolAddr);
-  let baseAmount = contract.baseAmount();
-  if (baseAmount.gt(ZERO_BI)) {
-    pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
-  }
-  let tokenAmount = contract.tokenAmount();
-  if (tokenAmount.gt(ZERO_BI)) {
-    pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
-  }
-  pool.save();
-}
+// DOES THIS CALL THE CURRENT BLOCK? OR THE BLOCK THAT THE SUBGRAPH IS UP TO?
+// export function syncBoth(poolAddr: Address): void {
+//   let pool = Pool.load(poolAddr.toHexString());
+//   let contract = PoolGen.bind(poolAddr);
+//   let baseAmount = contract.baseAmount();
+//   if (baseAmount.gt(ZERO_BI)) {
+//     pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
+//   }
+//   let tokenAmount = contract.tokenAmount();
+//   if (tokenAmount.gt(ZERO_BI)) {
+//     pool.tokenAmount = BigDecimal.fromString(tokenAmount.toString());
+//   }
+//   pool.save();
+// }

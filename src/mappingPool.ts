@@ -18,7 +18,7 @@ import {
   // MeltSynth,
   SynthPosition,
 } from "../generated/schema";
-import { addr_poolFactory, preDiviEventCurateds, ZERO_BD } from "./const";
+import { addr_poolFactory, DIVI_EVENT_TIMESTAMP, preDiviEventCurateds, ZERO_BD } from "./const";
 import {
   checkMember,
   checkPosition,
@@ -203,10 +203,10 @@ export function handleSwapped(event: Swapped): void {
   pool.save();
   // SYNC BASEAMOUNT IF CURATED (DIVIDEND) && BEFORE THE ROUTER WAS UPGRADED TO INC DIVI EVENT
   if (
-    event.block.number.lt(BigInt.fromI32(12093273)) &&
+    event.block.number.lt(DIVI_EVENT_TIMESTAMP) &&
     preDiviEventCurateds.includes(pool.id)
   ) {
-    sync(Address.fromString(poolAddress));
+    sync(Address.fromString(poolAddress)); // DOES THIS CALL THE CURRENT BLOCK? OR THE BLOCK THAT THE SUBGRAPH IS UP TO?
   }
   updateSpartaPrice();
   // swap.save();
