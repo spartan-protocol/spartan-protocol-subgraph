@@ -232,7 +232,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     if (metricGlobalPrev) {
       prevSynthVault = metricGlobalPrev.synthVault30Day;
       prevDaoVault = metricGlobalPrev.daoVault30Day;
-      let monthGlobalId = dayStart.minus(ONE_DAY.times(ONE_MONTH)).toString();
+      let monthGlobalId = dayStart.minus(ONE_MONTH).toString();
       let metricGlobalMonth = MetricsGlobalDay.load(monthGlobalId);
       if (metricGlobalMonth) {
         prevSynthVault = prevSynthVault.minus(
@@ -281,7 +281,7 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
         prevFees = metricPoolPrev.fees30Day;
         prevIncentives = metricPoolPrev.incentives30Day;
         let monthPoolId =
-          poolAddr + "#" + dayStart.minus(ONE_DAY.times(ONE_MONTH)).toString();
+          poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
         let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
         if (metricPoolMonth) {
           prevFees = prevFees.minus(metricPoolMonth.fees);
