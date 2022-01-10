@@ -185,6 +185,7 @@ export function updateDayMetrics(
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
+  checkPoolMetricsDay(dayStart, poolAddr)
   let global = MetricsGlobalDay.load(dayStart.toString());
 
   global.volSPARTA = global.volSPARTA.plus(volSPARTA);
@@ -256,7 +257,6 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.daoVault30Day = prevDaoVault;
     global.save();
   }
-  checkPoolMetricsDay(dayStart, poolAddr)
 }
 
 export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
@@ -306,7 +306,11 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
         poolFactory.spartaDerivedUSD
       );
       metricPool.save();
-      // sync(Address.fromString(poolAddr)); // I SUSPECT THIS CALLS THE CURRENT BLOCK, NOT THE BLOCK THAT THE SUBGRAPH IS UP TO
+      let tomorrow = dayStart.plus(ONE_DAY).toString(); // Check tomorrow exists
+      let globalTomorrow = MetricsGlobalDay.load(tomorrow); // Check tomorrow exists
+      if (!globalTomorrow) {
+        sync(Address.fromString(poolAddr));
+      }
     }
   }
 }
