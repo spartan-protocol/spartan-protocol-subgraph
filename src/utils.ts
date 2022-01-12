@@ -255,6 +255,7 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     global.daoVaultHarvest = ZERO_BD;
     global.synthVault30Day = prevSynthVault;
     global.daoVault30Day = prevDaoVault;
+    global.lpUnits = poolFactory.lpUnits;
     global.save();
   }
 }
@@ -305,6 +306,7 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
       metricPool.tokenPrice = getDerivedSparta(ZERO_BD, ONE_BD, poolAddr).times(
         poolFactory.spartaDerivedUSD
       );
+      metricPool.lpUnits = poolObj.totalSupply;
       metricPool.save();
       let tomorrow = dayStart.plus(ONE_DAY).toString(); // Check tomorrow exists
       let globalTomorrow = MetricsGlobalDay.load(tomorrow); // Check tomorrow exists

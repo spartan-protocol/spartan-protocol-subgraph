@@ -86,6 +86,15 @@ export class PoolFactory extends Entity {
   set tvlUSD(value: BigDecimal) {
     this.set("tvlUSD", Value.fromBigDecimal(value));
   }
+
+  get lpUnits(): BigDecimal {
+    let value = this.get("lpUnits");
+    return value.toBigDecimal();
+  }
+
+  set lpUnits(value: BigDecimal) {
+    this.set("lpUnits", Value.fromBigDecimal(value));
+  }
 }
 
 export class Token extends Entity {
@@ -830,6 +839,15 @@ export class MetricsGlobalDay extends Entity {
   set daoVault30Day(value: BigDecimal) {
     this.set("daoVault30Day", Value.fromBigDecimal(value));
   }
+
+  get lpUnits(): BigDecimal {
+    let value = this.get("lpUnits");
+    return value.toBigDecimal();
+  }
+
+  set lpUnits(value: BigDecimal) {
+    this.set("lpUnits", Value.fromBigDecimal(value));
+  }
 }
 
 export class MetricsPoolDay extends Entity {
@@ -986,5 +1004,14 @@ export class MetricsPoolDay extends Entity {
 
   set tokenPrice(value: BigDecimal) {
     this.set("tokenPrice", Value.fromBigDecimal(value));
+  }
+
+  get lpUnits(): BigDecimal {
+    let value = this.get("lpUnits");
+    return value.toBigDecimal();
+  }
+
+  set lpUnits(value: BigDecimal) {
+    this.set("lpUnits", Value.fromBigDecimal(value));
   }
 }

@@ -18,7 +18,12 @@ import {
   // MeltSynth,
   SynthPosition,
 } from "../generated/schema";
-import { addr_poolFactory, DIVI_EVENT_TIMESTAMP, preDiviEventCurateds, ZERO_BD } from "./const";
+import {
+  addr_poolFactory,
+  DIVI_EVENT_TIMESTAMP,
+  preDiviEventCurateds,
+  ZERO_BD,
+} from "./const";
 import {
   checkMember,
   checkPosition,
@@ -57,6 +62,8 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
   let derivedSparta = getDerivedSparta(inputBase, inputToken, pool.id);
   let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
+  poolFactory.lpUnits = poolFactory.lpUnits.plus(unitsIssued);
+  poolFactory.save();
 
   // let transaction = loadTransaction(event);
   // let liqAdd = new LiqAdd(
@@ -109,6 +116,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
   let derivedSparta = getDerivedSparta(outputBase, outputToken, pool.id);
   let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
+  poolFactory.lpUnits = poolFactory.lpUnits.minus(inputUnits);
+  poolFactory.save();
 
   pool.baseAmount = pool.baseAmount.minus(outputBase);
   pool.tokenAmount = pool.tokenAmount.minus(outputToken);
@@ -238,6 +247,8 @@ export function handleMintSynth(event: MintSynth): void {
   // let outputSynth = event.params.synthAmount.toBigDecimal();
 
   let derivedUsd = inputBase.times(poolFactory.spartaDerivedUSD);
+  poolFactory.lpUnits = poolFactory.lpUnits.plus(liqUnits);
+  poolFactory.save();
 
   pool.baseAmount = pool.baseAmount.plus(inputBase);
   pool.totalSupply = pool.totalSupply.plus(liqUnits);
@@ -299,6 +310,8 @@ export function handleBurnSynth(event: BurnSynth): void {
   let liqUnits = event.params.liqUnits.toBigDecimal();
   let outputBase = event.params.baseAmount.toBigDecimal();
   let derivedUsd = outputBase.times(poolFactory.spartaDerivedUSD);
+  poolFactory.lpUnits = poolFactory.lpUnits.minus(liqUnits);
+  poolFactory.save();
 
   pool.totalSupply = pool.totalSupply.minus(liqUnits);
   pool.baseAmount = pool.baseAmount.minus(outputBase);

@@ -22,6 +22,7 @@ export function handleCreatePool(event: CreatePool): void {
     poolFactory.spartaDerivedUSD = BigDecimal.fromString("0.6");
     poolFactory.tvlSPARTA = ZERO_BD;
     poolFactory.tvlUSD = ZERO_BD;
+    poolFactory.lpUnits = ZERO_BD;
   }
   // Load/create token
   let token = Token.load(event.params.token.toHexString());
