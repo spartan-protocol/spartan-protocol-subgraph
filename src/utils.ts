@@ -180,12 +180,13 @@ export function updateDayMetrics(
   incentives: BigDecimal,
   incentivesUSD: BigDecimal,
   synthVaultHarvest: BigDecimal,
-  daoVaultHarvest: BigDecimal
+  daoVaultHarvest: BigDecimal,
+  volTOKEN: BigDecimal,
 ): void {
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
   checkMetricsDay(dayStart, poolAddr);
-  checkPoolMetricsDay(dayStart, poolAddr)
+  checkPoolMetricsDay(dayStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
 
   global.volSPARTA = global.volSPARTA.plus(volSPARTA);
@@ -202,6 +203,7 @@ export function updateDayMetrics(
     let poolid = poolAddr + "#" + dayStart.toString();
     let metricPool = MetricsPoolDay.load(poolid);
     metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
+    metricPool.volTOKEN = metricPool.volTOKEN.plus(volTOKEN);
     metricPool.volUSD = metricPool.volUSD.plus(volUSD);
     metricPool.fees = metricPool.fees.plus(fees);
     metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
@@ -223,7 +225,8 @@ export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
     let prevGlobalId = dayStart.minus(ONE_DAY).toString();
     let metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId);
 
-    if (!metricGlobalPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) { // Check if yesterday exists (and is not genesis day)
+    if (!metricGlobalPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
+      // Check if yesterday exists (and is not genesis day)
       checkMetricsDay(BigInt.fromString(prevGlobalId), poolAddr); // If not genesis day & yesterday doesnt exist
     }
     metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId); // Load updated 'yesterday'
@@ -267,11 +270,12 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
     let poolid = poolAddr + "#" + dayStart.toString();
     let metricPool = MetricsPoolDay.load(poolid);
     if (!metricPool) {
-      let prevDay = dayStart.minus(ONE_DAY)
+      let prevDay = dayStart.minus(ONE_DAY);
       let prevPoolId = poolAddr + "#" + prevDay.toString();
       let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
 
-      if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) { // Check if yesterday exists (and is not genesis day)
+      if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
+        // Check if yesterday exists (and is not genesis day)
         checkPoolMetricsDay(prevDay, poolAddr); // If not genesis day & yesterday doesnt exist
       }
       metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
@@ -281,8 +285,7 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
       if (metricPoolPrev) {
         prevFees = metricPoolPrev.fees30Day;
         prevIncentives = metricPoolPrev.incentives30Day;
-        let monthPoolId =
-          poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
+        let monthPoolId = poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
         let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
         if (metricPoolMonth) {
           prevFees = prevFees.minus(metricPoolMonth.fees);
@@ -293,6 +296,7 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
       metricPool.timestamp = dayStart;
       metricPool.pool = poolAddr;
       metricPool.volSPARTA = ZERO_BD;
+      metricPool.volTOKEN = ZERO_BD;
       metricPool.volUSD = ZERO_BD;
       metricPool.fees = ZERO_BD;
       metricPool.feesUSD = ZERO_BD;
@@ -326,6 +330,17 @@ export function getDerivedSparta(
   let tokenRate = pool.baseAmount.div(pool.tokenAmount);
   let derivedSparta = spartaInput.plus(tokenInput.times(tokenRate));
   return derivedSparta;
+}
+
+export function getDerivedToken(
+  spartaInput: BigDecimal,
+  tokenInput: BigDecimal,
+  poolAddress: string
+): BigDecimal {
+  let pool = Pool.load(poolAddress);
+  let tokenRate = pool.tokenAmount.div(pool.baseAmount);
+  let derivedToken = tokenInput.plus(spartaInput.times(tokenRate));
+  return derivedToken;
 }
 
 export function checkMember(memberAddr: string): void {

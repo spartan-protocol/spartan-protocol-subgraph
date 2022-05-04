@@ -226,6 +226,7 @@ type MetricsPoolDay @entity {
   timestamp: BigInt! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
   pool: Pool!
   volSPARTA: BigDecimal! # Daily volume in SPARTA
+  volTOKEN: BigDecimal! # Daily volume in TOKEN
   volUSD: BigDecimal! # Daily volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)

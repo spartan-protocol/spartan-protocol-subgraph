@@ -29,6 +29,7 @@ import {
   checkPosition,
   checkSynthPosition,
   getDerivedSparta,
+  getDerivedToken,
   // loadTransaction,
   sync,
   updateDayMetrics,
@@ -181,11 +182,18 @@ export function handleSwapped(event: Swapped): void {
   pool.fees = pool.fees.plus(fee);
   pool.feesUSD = pool.feesUSD.plus(fee.times(poolFactory.spartaDerivedUSD));
 
-  let derivedSparta = getDerivedSparta(
-    fromSparta ? input : ZERO_BD,
-    fromSparta ? ZERO_BD : input,
-    pool.id
-  );
+  // let derivedSparta = getDerivedSparta(
+  //   fromSparta ? input : ZERO_BD,
+  //   fromSparta ? ZERO_BD : input,
+  //   pool.id
+  // );
+  let derivedSparta = fromSparta ? input : output;
+  // let derivedToken = getDerivedToken(
+  //   fromSparta ? input : ZERO_BD,
+  //   fromSparta ? ZERO_BD : input,
+  //   pool.id
+  // );
+  let derivedToken = fromSparta ? output : input;
   let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
 
   // let transaction = loadTransaction(event);
@@ -231,7 +239,8 @@ export function handleSwapped(event: Swapped): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
-    ZERO_BD
+    ZERO_BD,
+    derivedToken
   );
 }
 
@@ -244,7 +253,7 @@ export function handleMintSynth(event: MintSynth): void {
   let synthAddress = event.params.synthAddress.toHexString();
   let inputBase = event.params.baseAmount.toBigDecimal();
   let liqUnits = event.params.liqUnits.toBigDecimal();
-  // let outputSynth = event.params.synthAmount.toBigDecimal();
+  let outputSynth = event.params.synthAmount.toBigDecimal();
 
   let derivedUsd = inputBase.times(poolFactory.spartaDerivedUSD);
   poolFactory.lpUnits = poolFactory.lpUnits.plus(liqUnits);
@@ -295,7 +304,8 @@ export function handleMintSynth(event: MintSynth): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
-    ZERO_BD
+    ZERO_BD,
+    outputSynth
   );
 }
 
@@ -306,7 +316,7 @@ export function handleBurnSynth(event: BurnSynth): void {
 
   let memberAddr = event.params.member.toHexString();
   let synthAddress = event.params.synthAddress.toHexString();
-  // let inputSynth = event.params.synthAmount.toBigDecimal();
+  let inputSynth = event.params.synthAmount.toBigDecimal();
   let liqUnits = event.params.liqUnits.toBigDecimal();
   let outputBase = event.params.baseAmount.toBigDecimal();
   let derivedUsd = outputBase.times(poolFactory.spartaDerivedUSD);
@@ -358,6 +368,7 @@ export function handleBurnSynth(event: BurnSynth): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
-    ZERO_BD
+    ZERO_BD,
+    inputSynth
   );
 }

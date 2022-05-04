@@ -27,6 +27,7 @@ export function handleDividend(event: Dividend): void {
     derivedSparta,
     derivedUSD,
     ZERO_BD,
+    ZERO_BD,
     ZERO_BD
   );
 }

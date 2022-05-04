@@ -31,6 +31,7 @@ export function handleRealisePOL(event: RealisePOL): void {
     derivedSparta,
     derivedUSD,
     ZERO_BD,
+    ZERO_BD,
     ZERO_BD
   );
 }

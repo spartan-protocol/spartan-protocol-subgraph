@@ -907,6 +907,15 @@ export class MetricsPoolDay extends Entity {
     this.set("volSPARTA", Value.fromBigDecimal(value));
   }
 
+  get volTOKEN(): BigDecimal {
+    let value = this.get("volTOKEN");
+    return value.toBigDecimal();
+  }
+
+  set volTOKEN(value: BigDecimal) {
+    this.set("volTOKEN", Value.fromBigDecimal(value));
+  }
+
   get volUSD(): BigDecimal {
     let value = this.get("volUSD");
     return value.toBigDecimal();

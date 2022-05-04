@@ -55,7 +55,8 @@ export function handleHarvest(event: Harvest): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
-    harvested
+    harvested,
+    ZERO_BD
   );
 }
 

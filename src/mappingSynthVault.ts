@@ -33,6 +33,7 @@ export function handleMemberHarvests(event: MemberHarvests): void {
     ZERO_BD,
     ZERO_BD,
     harvested,
+    ZERO_BD,
     ZERO_BD
   );
 }
