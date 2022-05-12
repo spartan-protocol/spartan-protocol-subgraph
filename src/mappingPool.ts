@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal } from "@graphprotocol/graph-ts";
 import {
   AddLiquidity,
   RemoveLiquidity,
@@ -29,7 +29,7 @@ import {
   checkPosition,
   checkSynthPosition,
   getDerivedSparta,
-  getDerivedToken,
+  // getDerivedToken,
   // loadTransaction,
   sync,
   updateDayMetrics,

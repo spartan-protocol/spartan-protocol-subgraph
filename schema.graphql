@@ -53,8 +53,8 @@ type Member @entity {
   netForgeUsd: BigDecimal! # NET swapped for Synth derived in USD (realised)
   netMeltSparta: BigDecimal! # NET SPARTA received from melted Synths (realised)
   netMeltUsd: BigDecimal! # NET derived USD received from melted synths (realised)
-  netSynthHarvestSparta: BigDecimal! # 
-  netSynthHarvestUsd: BigDecimal! # 
+  netSynthHarvestSparta: BigDecimal! #
+  netSynthHarvestUsd: BigDecimal! #
   # liqAdds: [LiqAdd!]! @derivedFrom(field: "member")
   # liqRemoves: [LiqRemove!]! @derivedFrom(field: "member")
   # swaps: [Swap!]! @derivedFrom(field: "member")
@@ -86,8 +86,8 @@ type SynthPosition @entity {
   netForgeUsd: BigDecimal! # NET swapped for Synth derived in USD (realised)
   netMeltSparta: BigDecimal! # NET SPARTA received from melted Synths (realised)
   netMeltUsd: BigDecimal! # NET derived USD received from melted synths (realised)
-  netSynthHarvestSparta: BigDecimal! # 
-  netSynthHarvestUsd: BigDecimal! # 
+  netSynthHarvestSparta: BigDecimal! #
+  netSynthHarvestUsd: BigDecimal! #
 }
 
 # type Transaction @entity {
@@ -225,9 +225,12 @@ type MetricsPoolDay @entity {
   id: ID! # Pool address + Timestamp
   timestamp: BigInt! # Timestamp of start of day (timestamp / 86400 -> rounded * 86400)
   pool: Pool!
-  volSPARTA: BigDecimal! # Daily volume in SPARTA
-  volTOKEN: BigDecimal! # Daily volume in TOKEN
-  volUSD: BigDecimal! # Daily volume in USD
+  volSPARTA: BigDecimal! # Day's volume in SPARTA
+  volTOKEN: BigDecimal! # Day's volume in TOKEN
+  volUSD: BigDecimal! # Day's volume in USD
+  volRollingSPARTA: BigDecimal! # Rolling 24Hr volume in SPARTA
+  volRollingTOKEN: BigDecimal! # Rolling 24Hr volume in TOKEN
+  volRollingUSD: BigDecimal! # Rolling 24Hr volume in USD
   fees: BigDecimal! # Daily slip fees in SPARTA
   feesUSD: BigDecimal! # Daily slip fees in USD (derived internally)
   fees30Day: BigDecimal!
@@ -239,4 +242,27 @@ type MetricsPoolDay @entity {
   tvlUSD: BigDecimal!
   tokenPrice: BigDecimal!
   lpUnits: BigDecimal!
+}
+
+type MetricsPoolHour @entity {
+  id: ID! # Pool address + Timestamp
+  timestamp: BigInt! # Timestamp of start of hour (timestamp / 3600 -> rounded * 3600)
+  pool: Pool!
+  volSPARTA: BigDecimal! # Hour's volume in SPARTA
+  volTOKEN: BigDecimal! # Hour's volume in TOKEN
+  volUSD: BigDecimal! # Hour's volume in USD
+  volSPARTA24Hr: BigDecimal! # Rolling 24 hour volume in SPARTA
+  volTOKEN24Hr: BigDecimal! # Rolling 24 hour volume in TOKEN
+  volUSD24Hr: BigDecimal! # Rolling 24 hour volume in USD
+  # fees: BigDecimal! # Hourly slip fees in SPARTA
+  # feesUSD: BigDecimal! # Hourly slip fees in USD (derived internally)
+  # fees30Day: BigDecimal!
+  # incentives: BigDecimal! # Incentives paid into the pool (divis, realises etc)
+  # incentivesUSD: BigDecimal!
+  # incentives30Day: BigDecimal!
+  # txCount: BigInt! # Daily txns
+  # tvlSPARTA: BigDecimal!
+  # tvlUSD: BigDecimal!
+  # tokenPrice: BigDecimal!
+  # lpUnits: BigDecimal!
 }

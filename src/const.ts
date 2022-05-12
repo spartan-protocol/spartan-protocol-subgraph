@@ -41,5 +41,6 @@ export let ONE_BD = BigDecimal.fromString("1");
 
 export let DIVI_EVENT_TIMESTAMP = BigInt.fromI32(12093273);
 export let GENESIS_TIMESTAMP = BigInt.fromI32(1633305600);
+export let ONE_HOUR = BigInt.fromI32(3600);
 export let ONE_DAY = BigInt.fromI32(86400);
 export let ONE_MONTH = BigInt.fromI32(2592000);

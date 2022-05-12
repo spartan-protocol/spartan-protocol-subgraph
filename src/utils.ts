@@ -2,7 +2,7 @@ import { Pool as PoolGen } from "../generated/PoolFactory/Pool";
 import { iBEP20 } from "../generated/PoolFactory/iBEP20";
 import { iBEP20SymbolBytes } from "../generated/PoolFactory/iBEP20SymbolBytes";
 import { iBEP20NameBytes } from "../generated/PoolFactory/iBEP20NameBytes";
-import { Address, BigDecimal, BigInt, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import {
   PoolFactory,
   // Transaction,
@@ -13,6 +13,7 @@ import {
   MetricsPoolDay,
   Position,
   SynthPosition,
+  MetricsPoolHour,
 } from "../generated/schema";
 import {
   addr_poolFactory,
@@ -20,6 +21,7 @@ import {
   ONE_BD,
   ONE_BI,
   ONE_DAY,
+  ONE_HOUR,
   ONE_MONTH,
   stableCoins,
   ZERO_BD,
@@ -185,8 +187,11 @@ export function updateDayMetrics(
 ): void {
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
+  let hourStart = timestamp.mod(ONE_HOUR);
+  hourStart = timestamp.minus(hourStart);
   checkMetricsDay(dayStart, poolAddr);
   checkPoolMetricsDay(dayStart, poolAddr);
+  checkPoolMetricsHour(hourStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
 
   global.volSPARTA = global.volSPARTA.plus(volSPARTA);
@@ -200,11 +205,27 @@ export function updateDayMetrics(
   global.daoVault30Day = global.daoVault30Day.plus(daoVaultHarvest);
 
   if (poolAddr) {
+    let poolidHr = poolAddr + "#" + hourStart.toString();
+    let metricPoolHr = MetricsPoolHour.load(poolidHr);
+    let oneDaySpartaVol = metricPoolHr.volSPARTA24Hr.plus(volSPARTA);
+    let oneDayTokenVol = metricPoolHr.volTOKEN24Hr.plus(volTOKEN);
+    let oneDayUsdVol = metricPoolHr.volUSD24Hr.plus(volUSD);
+    metricPoolHr.volSPARTA = metricPoolHr.volSPARTA.plus(volSPARTA);
+    metricPoolHr.volTOKEN = metricPoolHr.volTOKEN.plus(volTOKEN);
+    metricPoolHr.volUSD = metricPoolHr.volUSD.plus(volUSD);
+    metricPoolHr.volSPARTA24Hr = oneDaySpartaVol;
+    metricPoolHr.volTOKEN24Hr = oneDayTokenVol;
+    metricPoolHr.volUSD24Hr = oneDayUsdVol;
+    metricPoolHr.save();
+
     let poolid = poolAddr + "#" + dayStart.toString();
     let metricPool = MetricsPoolDay.load(poolid);
     metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
     metricPool.volTOKEN = metricPool.volTOKEN.plus(volTOKEN);
     metricPool.volUSD = metricPool.volUSD.plus(volUSD);
+    metricPool.volRollingSPARTA = oneDaySpartaVol;
+    metricPool.volRollingTOKEN = oneDayTokenVol;
+    metricPool.volRollingUSD = oneDayUsdVol;
     metricPool.fees = metricPool.fees.plus(fees);
     metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
     metricPool.fees30Day = metricPool.fees30Day.plus(fees);
@@ -298,6 +319,9 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
       metricPool.volSPARTA = ZERO_BD;
       metricPool.volTOKEN = ZERO_BD;
       metricPool.volUSD = ZERO_BD;
+      metricPool.volRollingSPARTA = ZERO_BD;
+      metricPool.volRollingTOKEN = ZERO_BD;
+      metricPool.volRollingUSD = ZERO_BD;
       metricPool.fees = ZERO_BD;
       metricPool.feesUSD = ZERO_BD;
       metricPool.fees30Day = prevFees;
@@ -317,6 +341,50 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
       if (!globalTomorrow) {
         sync(Address.fromString(poolAddr));
       }
+    }
+  }
+}
+
+export function checkPoolMetricsHour(hourStart: BigInt, poolAddr: string): void {
+  if (poolAddr) {
+    let poolid = poolAddr + "#" + hourStart.toString();
+    let metricPoolHr = MetricsPoolHour.load(poolid);
+    if (!metricPoolHr) {
+      let prevHour = hourStart.minus(ONE_HOUR);
+      let prevPoolId = poolAddr + "#" + prevHour.toString();
+      let metricPoolPrev = MetricsPoolHour.load(prevPoolId);
+
+      if (!metricPoolPrev && hourStart.notEqual(GENESIS_TIMESTAMP)) {
+        // Check if yesterday exists (and is not genesis day)
+        checkPoolMetricsHour(prevHour, poolAddr); // If not genesis day & yesterday doesnt exist
+      }
+      metricPoolPrev = MetricsPoolHour.load(prevPoolId); // Load updated 'yesterday'
+
+      let prevSpartaVol = ZERO_BD;
+      let prevTokenVol = ZERO_BD;
+      let prevUsdVol = ZERO_BD;
+      if (metricPoolPrev) {
+        prevSpartaVol = metricPoolPrev.volSPARTA24Hr;
+        prevTokenVol = metricPoolPrev.volTOKEN24Hr;
+        prevUsdVol = metricPoolPrev.volUSD24Hr;
+        let oneDayPoolId = poolAddr + "#" + hourStart.minus(ONE_DAY).toString();
+        let metricPool24Hr = MetricsPoolHour.load(oneDayPoolId);
+        if (metricPool24Hr) {
+          prevSpartaVol = prevSpartaVol.minus(metricPool24Hr.volSPARTA);
+          prevTokenVol = prevTokenVol.minus(metricPool24Hr.volTOKEN);
+          prevUsdVol = prevUsdVol.minus(metricPool24Hr.volUSD);
+        }
+      }
+      metricPoolHr = new MetricsPoolHour(poolid);
+      metricPoolHr.timestamp = hourStart;
+      metricPoolHr.pool = poolAddr;
+      metricPoolHr.volSPARTA = ZERO_BD;
+      metricPoolHr.volTOKEN = ZERO_BD;
+      metricPoolHr.volUSD = ZERO_BD;
+      metricPoolHr.volSPARTA24Hr = prevSpartaVol;
+      metricPoolHr.volTOKEN24Hr = prevTokenVol;
+      metricPoolHr.volUSD24Hr = prevUsdVol;
+      metricPoolHr.save();
     }
   }
 }

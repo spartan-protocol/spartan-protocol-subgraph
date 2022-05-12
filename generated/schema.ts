@@ -925,6 +925,33 @@ export class MetricsPoolDay extends Entity {
     this.set("volUSD", Value.fromBigDecimal(value));
   }
 
+  get volRollingSPARTA(): BigDecimal {
+    let value = this.get("volRollingSPARTA");
+    return value.toBigDecimal();
+  }
+
+  set volRollingSPARTA(value: BigDecimal) {
+    this.set("volRollingSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get volRollingTOKEN(): BigDecimal {
+    let value = this.get("volRollingTOKEN");
+    return value.toBigDecimal();
+  }
+
+  set volRollingTOKEN(value: BigDecimal) {
+    this.set("volRollingTOKEN", Value.fromBigDecimal(value));
+  }
+
+  get volRollingUSD(): BigDecimal {
+    let value = this.get("volRollingUSD");
+    return value.toBigDecimal();
+  }
+
+  set volRollingUSD(value: BigDecimal) {
+    this.set("volRollingUSD", Value.fromBigDecimal(value));
+  }
+
   get fees(): BigDecimal {
     let value = this.get("fees");
     return value.toBigDecimal();
@@ -1022,5 +1049,108 @@ export class MetricsPoolDay extends Entity {
 
   set lpUnits(value: BigDecimal) {
     this.set("lpUnits", Value.fromBigDecimal(value));
+  }
+}
+
+export class MetricsPoolHour extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id !== null, "Cannot save MetricsPoolHour entity without an ID");
+    assert(
+      id.kind == ValueKind.STRING,
+      "Cannot save MetricsPoolHour entity with non-string ID. " +
+        'Considering using .toHex() to convert the "id" to a string.'
+    );
+    store.set("MetricsPoolHour", id.toString(), this);
+  }
+
+  static load(id: string): MetricsPoolHour | null {
+    return store.get("MetricsPoolHour", id) as MetricsPoolHour | null;
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get pool(): string {
+    let value = this.get("pool");
+    return value.toString();
+  }
+
+  set pool(value: string) {
+    this.set("pool", Value.fromString(value));
+  }
+
+  get volSPARTA(): BigDecimal {
+    let value = this.get("volSPARTA");
+    return value.toBigDecimal();
+  }
+
+  set volSPARTA(value: BigDecimal) {
+    this.set("volSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get volTOKEN(): BigDecimal {
+    let value = this.get("volTOKEN");
+    return value.toBigDecimal();
+  }
+
+  set volTOKEN(value: BigDecimal) {
+    this.set("volTOKEN", Value.fromBigDecimal(value));
+  }
+
+  get volUSD(): BigDecimal {
+    let value = this.get("volUSD");
+    return value.toBigDecimal();
+  }
+
+  set volUSD(value: BigDecimal) {
+    this.set("volUSD", Value.fromBigDecimal(value));
+  }
+
+  get volSPARTA24Hr(): BigDecimal {
+    let value = this.get("volSPARTA24Hr");
+    return value.toBigDecimal();
+  }
+
+  set volSPARTA24Hr(value: BigDecimal) {
+    this.set("volSPARTA24Hr", Value.fromBigDecimal(value));
+  }
+
+  get volTOKEN24Hr(): BigDecimal {
+    let value = this.get("volTOKEN24Hr");
+    return value.toBigDecimal();
+  }
+
+  set volTOKEN24Hr(value: BigDecimal) {
+    this.set("volTOKEN24Hr", Value.fromBigDecimal(value));
+  }
+
+  get volUSD24Hr(): BigDecimal {
+    let value = this.get("volUSD24Hr");
+    return value.toBigDecimal();
+  }
+
+  set volUSD24Hr(value: BigDecimal) {
+    this.set("volUSD24Hr", Value.fromBigDecimal(value));
   }
 }
