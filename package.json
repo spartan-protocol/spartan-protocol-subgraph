@@ -10,7 +10,9 @@
     "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 spartan-protocol/pool-factory"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.21.0",
-    "@graphprotocol/graph-ts": "0.20.0"
+    "@graphprotocol/graph-ts": "^0.27.0"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.33.0"
   }
 }

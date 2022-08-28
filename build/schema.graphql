@@ -60,10 +60,10 @@ type Member @entity {
   # swaps: [Swap!]! @derivedFrom(field: "member")
   # forgeSynths: [ForgeSynth!]! @derivedFrom(field: "member")
   # meltSynths: [MeltSynth!]! @derivedFrom(field: "member")
-  # harvests: [Harvest]! @derivedFrom(field: "member")
-  # bonds: [Bond]! @derivedFrom(field: "member")
-  positions: [Position]! @derivedFrom(field: "member")
-  synthPositions: [SynthPosition]! @derivedFrom(field: "member")
+  # harvests: [Harvest!]! @derivedFrom(field: "member")
+  # bonds: [Bond!]! @derivedFrom(field: "member")
+  positions: [Position!]! @derivedFrom(field: "member")
+  synthPositions: [SynthPosition!]! @derivedFrom(field: "member")
 }
 
 type Position @entity {

@@ -251,6 +251,14 @@ export class Pool__burnSynthResult {
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
   }
+
+  getOutputAmount(): BigInt {
+    return this.value0;
+  }
+
+  getFee(): BigInt {
+    return this.value1;
+  }
 }
 
 export class Pool__mintSynthResult {
@@ -267,6 +275,14 @@ export class Pool__mintSynthResult {
     map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
+  }
+
+  getOutputAmount(): BigInt {
+    return this.value0;
+  }
+
+  getFee(): BigInt {
+    return this.value1;
   }
 }
 
@@ -285,6 +301,14 @@ export class Pool__removeForMemberResult {
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
   }
+
+  getOutputBase(): BigInt {
+    return this.value0;
+  }
+
+  getOutputToken(): BigInt {
+    return this.value1;
+  }
 }
 
 export class Pool__swapToResult {
@@ -301,6 +325,14 @@ export class Pool__swapToResult {
     map.set("value0", ethereum.Value.fromUnsignedBigInt(this.value0));
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
+  }
+
+  getOutputAmount(): BigInt {
+    return this.value0;
+  }
+
+  getFee(): BigInt {
+    return this.value1;
   }
 }
 

@@ -103,6 +103,14 @@ export class SynthVault__calcRewardResult {
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     return map;
   }
+
+  get_share(): BigInt {
+    return this.value0;
+  }
+
+  get_vaultReward(): BigInt {
+    return this.value1;
+  }
 }
 
 export class SynthVault__getMemberSynthWeightResult {
@@ -122,6 +130,18 @@ export class SynthVault__getMemberSynthWeightResult {
     map.set("value1", ethereum.Value.fromUnsignedBigInt(this.value1));
     map.set("value2", ethereum.Value.fromUnsignedBigInt(this.value2));
     return map;
+  }
+
+  getMemberSynthWeight(): BigInt {
+    return this.value0;
+  }
+
+  getSynthWeight(): BigInt {
+    return this.value1;
+  }
+
+  getTotalSynthWeight(): BigInt {
+    return this.value2;
   }
 }
 
