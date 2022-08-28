@@ -84,24 +84,22 @@ export function fetchTokenName(tokenAddress: Address): string {
 
 export function fetchTokenTotalSupply(tokenAddress: Address): BigInt {
   let contract = iBEP20.bind(tokenAddress);
-  let totalSupplyValue = null;
   let totalSupplyResult = contract.try_totalSupply();
   if (!totalSupplyResult.reverted) {
-    totalSupplyValue = totalSupplyResult as i32;
+    return totalSupplyResult.value;
   }
-  return BigInt.fromI32(totalSupplyValue as i32);
+  return ZERO_BI;
 }
 
 export function fetchTokenDecimals(tokenAddress: Address): BigInt {
   let contract = iBEP20.bind(tokenAddress);
   // try types uint8 for decimals
-  let decimalValue = null;
   let decimalResult = contract.try_decimals();
   if (!decimalResult.reverted) {
-    decimalValue = decimalResult.value;
+    return BigInt.fromI32(decimalResult.value as i32);
   }
 
-  return BigInt.fromI32(decimalValue as i32);
+  return ZERO_BI;
 }
 
 export function isNullEthValue(value: string): boolean {
@@ -136,40 +134,44 @@ export function getPoolAddr(tokenAddress: string): string {
 // CHANGE THIS TO USE THE DEEPEST STABLECOIN POOL???
 export function updateSpartaPrice(): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
-  let spartaPrice = ZERO_BD;
-  let avgCount = ZERO_BI;
-  let length = stableCoins.length;
-  for (let i = 0; i < length; i++) {
-    let pool = Pool.load(getPoolAddr(stableCoins[i]));
-    if (pool) {
-      if (
-        pool.baseAmount.gt(BigDecimal.fromString("100000000000000000000000"))
-      ) {
-        spartaPrice = pool.tokenAmount.div(pool.baseAmount).plus(spartaPrice);
-        avgCount = avgCount.plus(BigInt.fromI32(1));
+  if (poolFactory) {
+    let spartaPrice = ZERO_BD;
+    let avgCount = ZERO_BI;
+    let length = stableCoins.length;
+    for (let i = 0; i < length; i++) {
+      let pool = Pool.load(getPoolAddr(stableCoins[i]));
+      if (pool) {
+        if (
+          pool.baseAmount.gt(BigDecimal.fromString("100000000000000000000000"))
+        ) {
+          spartaPrice = pool.tokenAmount.div(pool.baseAmount).plus(spartaPrice);
+          avgCount = avgCount.plus(BigInt.fromI32(1));
+        }
       }
     }
-  }
-  if (avgCount.gt(ZERO_BI)) {
-    spartaPrice = spartaPrice.div(BigDecimal.fromString(avgCount.toString()));
-    poolFactory.spartaDerivedUSD = spartaPrice;
-    poolFactory.save();
+    if (avgCount.gt(ZERO_BI)) {
+      spartaPrice = spartaPrice.div(BigDecimal.fromString(avgCount.toString()));
+      poolFactory.spartaDerivedUSD = spartaPrice;
+      poolFactory.save();
+    }
   }
 }
 
 export function updateTVL(poolAddr: string): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
   let pool = Pool.load(poolAddr);
-  poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.minus(pool.tvlSPARTA);
-  poolFactory.tvlUSD = poolFactory.tvlUSD.minus(pool.tvlUSD);
-  let derivedSparta = pool.baseAmount.times(BigDecimal.fromString("2"));
-  let derivedUSD = derivedSparta.times(poolFactory.spartaDerivedUSD);
-  pool.tvlSPARTA = derivedSparta;
-  pool.tvlUSD = derivedUSD;
-  poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.plus(derivedSparta);
-  poolFactory.tvlUSD = poolFactory.tvlUSD.plus(derivedUSD);
-  pool.save();
-  poolFactory.save();
+  if (pool && poolFactory) {
+    poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.minus(pool.tvlSPARTA);
+    poolFactory.tvlUSD = poolFactory.tvlUSD.minus(pool.tvlUSD);
+    let derivedSparta = pool.baseAmount.times(BigDecimal.fromString("2"));
+    let derivedUSD = derivedSparta.times(poolFactory.spartaDerivedUSD);
+    pool.tvlSPARTA = derivedSparta;
+    pool.tvlUSD = derivedUSD;
+    poolFactory.tvlSPARTA = poolFactory.tvlSPARTA.plus(derivedSparta);
+    poolFactory.tvlUSD = poolFactory.tvlUSD.plus(derivedUSD);
+    pool.save();
+    poolFactory.save();
+  }
 }
 
 export function updateDayMetrics(
@@ -183,170 +185,185 @@ export function updateDayMetrics(
   incentivesUSD: BigDecimal,
   synthVaultHarvest: BigDecimal,
   daoVaultHarvest: BigDecimal,
-  volTOKEN: BigDecimal,
+  volTOKEN: BigDecimal
 ): void {
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
   let hourStart = timestamp.mod(ONE_HOUR);
   hourStart = timestamp.minus(hourStart);
-  checkMetricsDay(dayStart, poolAddr);
+  checkMetricsDay(dayStart);
   checkPoolMetricsDay(dayStart, poolAddr);
   checkPoolMetricsHour(hourStart, poolAddr);
   let global = MetricsGlobalDay.load(dayStart.toString());
-
-  global.volSPARTA = global.volSPARTA.plus(volSPARTA);
-  global.volUSD = global.volUSD.plus(volUSD);
-  global.fees = global.fees.plus(fees);
-  global.feesUSD = global.feesUSD.plus(feesUSD);
-  global.txCount = global.txCount.plus(ONE_BI);
-  global.synthVaultHarvest = global.synthVaultHarvest.plus(synthVaultHarvest);
-  global.daoVaultHarvest = global.daoVaultHarvest.plus(daoVaultHarvest);
-  global.synthVault30Day = global.synthVault30Day.plus(synthVaultHarvest);
-  global.daoVault30Day = global.daoVault30Day.plus(daoVaultHarvest);
-
-  if (poolAddr) {
-    let poolidHr = poolAddr + "#" + hourStart.toString();
-    let metricPoolHr = MetricsPoolHour.load(poolidHr);
-    let oneDaySpartaVol = metricPoolHr.volSPARTA24Hr.plus(volSPARTA);
-    let oneDayTokenVol = metricPoolHr.volTOKEN24Hr.plus(volTOKEN);
-    let oneDayUsdVol = metricPoolHr.volUSD24Hr.plus(volUSD);
-    metricPoolHr.volSPARTA = metricPoolHr.volSPARTA.plus(volSPARTA);
-    metricPoolHr.volTOKEN = metricPoolHr.volTOKEN.plus(volTOKEN);
-    metricPoolHr.volUSD = metricPoolHr.volUSD.plus(volUSD);
-    metricPoolHr.volSPARTA24Hr = oneDaySpartaVol;
-    metricPoolHr.volTOKEN24Hr = oneDayTokenVol;
-    metricPoolHr.volUSD24Hr = oneDayUsdVol;
-    metricPoolHr.save();
-
-    let poolid = poolAddr + "#" + dayStart.toString();
-    let metricPool = MetricsPoolDay.load(poolid);
-    metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
-    metricPool.volTOKEN = metricPool.volTOKEN.plus(volTOKEN);
-    metricPool.volUSD = metricPool.volUSD.plus(volUSD);
-    metricPool.volRollingSPARTA = oneDaySpartaVol;
-    metricPool.volRollingTOKEN = oneDayTokenVol;
-    metricPool.volRollingUSD = oneDayUsdVol;
-    metricPool.fees = metricPool.fees.plus(fees);
-    metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
-    metricPool.fees30Day = metricPool.fees30Day.plus(fees);
-    metricPool.incentives = metricPool.incentives.plus(incentives);
-    metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
-    metricPool.incentives30Day = metricPool.incentives30Day.plus(incentives);
-    metricPool.txCount = metricPool.txCount.plus(ONE_BI);
-    metricPool.save();
+  if (global) {
+    global.volSPARTA = global.volSPARTA.plus(volSPARTA);
+    global.volUSD = global.volUSD.plus(volUSD);
+    global.fees = global.fees.plus(fees);
+    global.feesUSD = global.feesUSD.plus(feesUSD);
+    global.txCount = global.txCount.plus(ONE_BI);
+    global.synthVaultHarvest = global.synthVaultHarvest.plus(synthVaultHarvest);
+    global.daoVaultHarvest = global.daoVaultHarvest.plus(daoVaultHarvest);
+    global.synthVault30Day = global.synthVault30Day.plus(synthVaultHarvest);
+    global.daoVault30Day = global.daoVault30Day.plus(daoVaultHarvest);
+    global.save();
   }
 
-  global.save();
-}
-
-export function checkMetricsDay(dayStart: BigInt, poolAddr: string): void {
-  let poolFactory = PoolFactory.load(addr_poolFactory);
-  let global = MetricsGlobalDay.load(dayStart.toString());
-  if (!global) {
-    let prevGlobalId = dayStart.minus(ONE_DAY).toString();
-    let metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId);
-
-    if (!metricGlobalPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
-      // Check if yesterday exists (and is not genesis day)
-      checkMetricsDay(BigInt.fromString(prevGlobalId), poolAddr); // If not genesis day & yesterday doesnt exist
-    }
-    metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId); // Load updated 'yesterday'
-
-    let prevSynthVault = ZERO_BD;
-    let prevDaoVault = ZERO_BD;
-    if (metricGlobalPrev) {
-      prevSynthVault = metricGlobalPrev.synthVault30Day;
-      prevDaoVault = metricGlobalPrev.daoVault30Day;
-      let monthGlobalId = dayStart.minus(ONE_MONTH).toString();
-      let metricGlobalMonth = MetricsGlobalDay.load(monthGlobalId);
-      if (metricGlobalMonth) {
-        prevSynthVault = prevSynthVault.minus(
-          metricGlobalMonth.synthVaultHarvest
+  if (poolAddr !== "") {
+    let poolidHr = poolAddr + "#" + hourStart.toString();
+    let metricPoolHr = MetricsPoolHour.load(poolidHr);
+    if (metricPoolHr) {
+      let oneDaySpartaVol = metricPoolHr.volSPARTA24Hr.plus(volSPARTA);
+      let oneDayTokenVol = metricPoolHr.volTOKEN24Hr.plus(volTOKEN);
+      let oneDayUsdVol = metricPoolHr.volUSD24Hr.plus(volUSD);
+      metricPoolHr.volSPARTA = metricPoolHr.volSPARTA.plus(volSPARTA);
+      metricPoolHr.volTOKEN = metricPoolHr.volTOKEN.plus(volTOKEN);
+      metricPoolHr.volUSD = metricPoolHr.volUSD.plus(volUSD);
+      metricPoolHr.volSPARTA24Hr = oneDaySpartaVol;
+      metricPoolHr.volTOKEN24Hr = oneDayTokenVol;
+      metricPoolHr.volUSD24Hr = oneDayUsdVol;
+      metricPoolHr.save();
+      let poolid = poolAddr + "#" + dayStart.toString();
+      let metricPool = MetricsPoolDay.load(poolid);
+      if (metricPool) {
+        metricPool.volSPARTA = metricPool.volSPARTA.plus(volSPARTA);
+        metricPool.volTOKEN = metricPool.volTOKEN.plus(volTOKEN);
+        metricPool.volUSD = metricPool.volUSD.plus(volUSD);
+        metricPool.volRollingSPARTA = oneDaySpartaVol;
+        metricPool.volRollingTOKEN = oneDayTokenVol;
+        metricPool.volRollingUSD = oneDayUsdVol;
+        metricPool.fees = metricPool.fees.plus(fees);
+        metricPool.feesUSD = metricPool.feesUSD.plus(feesUSD);
+        metricPool.fees30Day = metricPool.fees30Day.plus(fees);
+        metricPool.incentives = metricPool.incentives.plus(incentives);
+        metricPool.incentivesUSD = metricPool.incentivesUSD.plus(incentivesUSD);
+        metricPool.incentives30Day = metricPool.incentives30Day.plus(
+          incentives
         );
-        prevDaoVault = prevDaoVault.minus(metricGlobalMonth.daoVaultHarvest);
+        metricPool.txCount = metricPool.txCount.plus(ONE_BI);
+        metricPool.save();
       }
     }
-    global = new MetricsGlobalDay(dayStart.toString());
-    global.timestamp = dayStart;
-    global.volSPARTA = ZERO_BD;
-    global.volUSD = ZERO_BD;
-    global.fees = ZERO_BD;
-    global.feesUSD = ZERO_BD;
-    global.txCount = ZERO_BI;
-    global.tvlSPARTA = poolFactory.tvlSPARTA;
-    global.tvlUSD = poolFactory.tvlUSD;
-    global.synthVaultHarvest = ZERO_BD;
-    global.daoVaultHarvest = ZERO_BD;
-    global.synthVault30Day = prevSynthVault;
-    global.daoVault30Day = prevDaoVault;
-    global.lpUnits = poolFactory.lpUnits;
-    global.save();
+  }
+}
+
+export function checkMetricsDay(dayStart: BigInt): void {
+  let poolFactory = PoolFactory.load(addr_poolFactory);
+  if (poolFactory) {
+    let global = MetricsGlobalDay.load(dayStart.toString());
+    if (!global) {
+      let prevGlobalId = dayStart.minus(ONE_DAY).toString();
+      let metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId);
+
+      if (!metricGlobalPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
+        // Check if yesterday exists (and is not genesis day)
+        checkMetricsDay(BigInt.fromString(prevGlobalId)); // If not genesis day & yesterday doesnt exist
+      }
+      metricGlobalPrev = MetricsGlobalDay.load(prevGlobalId); // Load updated 'yesterday'
+
+      let prevSynthVault = ZERO_BD;
+      let prevDaoVault = ZERO_BD;
+      if (metricGlobalPrev) {
+        prevSynthVault = metricGlobalPrev.synthVault30Day;
+        prevDaoVault = metricGlobalPrev.daoVault30Day;
+        let monthGlobalId = dayStart.minus(ONE_MONTH).toString();
+        let metricGlobalMonth = MetricsGlobalDay.load(monthGlobalId);
+        if (metricGlobalMonth) {
+          prevSynthVault = prevSynthVault.minus(
+            metricGlobalMonth.synthVaultHarvest
+          );
+          prevDaoVault = prevDaoVault.minus(metricGlobalMonth.daoVaultHarvest);
+        }
+      }
+      global = new MetricsGlobalDay(dayStart.toString());
+      global.timestamp = dayStart;
+      global.volSPARTA = ZERO_BD;
+      global.volUSD = ZERO_BD;
+      global.fees = ZERO_BD;
+      global.feesUSD = ZERO_BD;
+      global.txCount = ZERO_BI;
+      global.tvlSPARTA = poolFactory.tvlSPARTA;
+      global.tvlUSD = poolFactory.tvlUSD;
+      global.synthVaultHarvest = ZERO_BD;
+      global.daoVaultHarvest = ZERO_BD;
+      global.synthVault30Day = prevSynthVault;
+      global.daoVault30Day = prevDaoVault;
+      global.lpUnits = poolFactory.lpUnits;
+      global.save();
+    }
   }
 }
 
 export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
-  if (poolAddr) {
+  if (poolAddr !== "" && poolFactory) {
     let poolObj = Pool.load(poolAddr);
-    let poolid = poolAddr + "#" + dayStart.toString();
-    let metricPool = MetricsPoolDay.load(poolid);
-    if (!metricPool) {
-      let prevDay = dayStart.minus(ONE_DAY);
-      let prevPoolId = poolAddr + "#" + prevDay.toString();
-      let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
+    if (poolObj) {
+      let poolid = poolAddr + "#" + dayStart.toString();
+      let metricPool = MetricsPoolDay.load(poolid);
+      if (!metricPool) {
+        let prevDay = dayStart.minus(ONE_DAY);
+        let prevPoolId = poolAddr + "#" + prevDay.toString();
+        let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
 
-      if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
-        // Check if yesterday exists (and is not genesis day)
-        checkPoolMetricsDay(prevDay, poolAddr); // If not genesis day & yesterday doesnt exist
-      }
-      metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
-
-      let prevFees = ZERO_BD;
-      let prevIncentives = ZERO_BD;
-      if (metricPoolPrev) {
-        prevFees = metricPoolPrev.fees30Day;
-        prevIncentives = metricPoolPrev.incentives30Day;
-        let monthPoolId = poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
-        let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
-        if (metricPoolMonth) {
-          prevFees = prevFees.minus(metricPoolMonth.fees);
-          prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+        if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
+          // Check if yesterday exists (and is not genesis day)
+          checkPoolMetricsDay(prevDay, poolAddr); // If not genesis day & yesterday doesnt exist
         }
-      }
-      metricPool = new MetricsPoolDay(poolid);
-      metricPool.timestamp = dayStart;
-      metricPool.pool = poolAddr;
-      metricPool.volSPARTA = ZERO_BD;
-      metricPool.volTOKEN = ZERO_BD;
-      metricPool.volUSD = ZERO_BD;
-      metricPool.volRollingSPARTA = ZERO_BD;
-      metricPool.volRollingTOKEN = ZERO_BD;
-      metricPool.volRollingUSD = ZERO_BD;
-      metricPool.fees = ZERO_BD;
-      metricPool.feesUSD = ZERO_BD;
-      metricPool.fees30Day = prevFees;
-      metricPool.incentives = ZERO_BD;
-      metricPool.incentivesUSD = ZERO_BD;
-      metricPool.incentives30Day = prevIncentives;
-      metricPool.txCount = ZERO_BI;
-      metricPool.tvlSPARTA = poolObj.tvlSPARTA;
-      metricPool.tvlUSD = poolObj.tvlUSD;
-      metricPool.tokenPrice = getDerivedSparta(ZERO_BD, ONE_BD, poolAddr).times(
-        poolFactory.spartaDerivedUSD
-      );
-      metricPool.lpUnits = poolObj.totalSupply;
-      metricPool.save();
-      let tomorrow = dayStart.plus(ONE_DAY).toString(); // Check tomorrow exists
-      let globalTomorrow = MetricsGlobalDay.load(tomorrow); // Check tomorrow exists
-      if (!globalTomorrow) {
-        sync(Address.fromString(poolAddr));
+        metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
+
+        let prevFees = ZERO_BD;
+        let prevIncentives = ZERO_BD;
+        if (metricPoolPrev) {
+          prevFees = metricPoolPrev.fees30Day;
+          prevIncentives = metricPoolPrev.incentives30Day;
+          let monthPoolId =
+            poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
+          let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
+          if (metricPoolMonth) {
+            prevFees = prevFees.minus(metricPoolMonth.fees);
+            prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+          }
+        }
+        metricPool = new MetricsPoolDay(poolid);
+        metricPool.timestamp = dayStart;
+        metricPool.pool = poolAddr;
+        metricPool.volSPARTA = ZERO_BD;
+        metricPool.volTOKEN = ZERO_BD;
+        metricPool.volUSD = ZERO_BD;
+        metricPool.volRollingSPARTA = ZERO_BD;
+        metricPool.volRollingTOKEN = ZERO_BD;
+        metricPool.volRollingUSD = ZERO_BD;
+        metricPool.fees = ZERO_BD;
+        metricPool.feesUSD = ZERO_BD;
+        metricPool.fees30Day = prevFees;
+        metricPool.incentives = ZERO_BD;
+        metricPool.incentivesUSD = ZERO_BD;
+        metricPool.incentives30Day = prevIncentives;
+        metricPool.txCount = ZERO_BI;
+        metricPool.tvlSPARTA = poolObj.tvlSPARTA;
+        metricPool.tvlUSD = poolObj.tvlUSD;
+        metricPool.tokenPrice = getDerivedSparta(
+          ZERO_BD,
+          ONE_BD,
+          poolAddr
+        ).times(poolFactory.spartaDerivedUSD);
+        metricPool.lpUnits = poolObj.totalSupply;
+        metricPool.save();
+        let tomorrow = dayStart.plus(ONE_DAY).toString(); // Check tomorrow exists
+        let globalTomorrow = MetricsGlobalDay.load(tomorrow); // Check tomorrow exists
+        if (!globalTomorrow) {
+          sync(Address.fromString(poolAddr));
+        }
       }
     }
   }
 }
 
-export function checkPoolMetricsHour(hourStart: BigInt, poolAddr: string): void {
-  if (poolAddr) {
+export function checkPoolMetricsHour(
+  hourStart: BigInt,
+  poolAddr: string
+): void {
+  if (poolAddr !== "") {
     let poolid = poolAddr + "#" + hourStart.toString();
     let metricPoolHr = MetricsPoolHour.load(poolid);
     if (!metricPoolHr) {
@@ -395,9 +412,12 @@ export function getDerivedSparta(
   poolAddress: string
 ): BigDecimal {
   let pool = Pool.load(poolAddress);
-  let tokenRate = pool.baseAmount.div(pool.tokenAmount);
-  let derivedSparta = spartaInput.plus(tokenInput.times(tokenRate));
-  return derivedSparta;
+  if (pool) {
+    let tokenRate = pool.baseAmount.div(pool.tokenAmount);
+    let derivedSparta = spartaInput.plus(tokenInput.times(tokenRate));
+    return derivedSparta;
+  }
+  return ZERO_BD;
 }
 
 export function getDerivedToken(
@@ -406,9 +426,12 @@ export function getDerivedToken(
   poolAddress: string
 ): BigDecimal {
   let pool = Pool.load(poolAddress);
-  let tokenRate = pool.tokenAmount.div(pool.baseAmount);
-  let derivedToken = tokenInput.plus(spartaInput.times(tokenRate));
-  return derivedToken;
+  if (pool) {
+    let tokenRate = pool.tokenAmount.div(pool.baseAmount);
+    let derivedToken = tokenInput.plus(spartaInput.times(tokenRate));
+    return derivedToken;
+  }
+  return ZERO_BD;
 }
 
 export function checkMember(memberAddr: string): void {
@@ -472,12 +495,14 @@ export function checkSynthPosition(
 // DOES THIS CALL THE CURRENT BLOCK? OR THE BLOCK THAT THE SUBGRAPH IS UP TO?
 export function sync(poolAddr: Address): void {
   let pool = Pool.load(poolAddr.toHexString());
-  let contract = PoolGen.bind(poolAddr);
-  let baseAmount = contract.baseAmount();
-  if (baseAmount.gt(ZERO_BI)) {
-    pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
+  if (pool) {
+    let contract = PoolGen.bind(poolAddr);
+    let baseAmount = contract.baseAmount();
+    if (baseAmount.gt(ZERO_BI)) {
+      pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
+    }
+    pool.save();
   }
-  pool.save();
 }
 
 // DOES THIS CALL THE CURRENT BLOCK? OR THE BLOCK THAT THE SUBGRAPH IS UP TO?

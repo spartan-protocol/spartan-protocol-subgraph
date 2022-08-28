@@ -707,7 +707,9 @@ export class Dao extends ethereum.SmartContract {
       [ethereum.Value.fromUnsignedBigInt(proposalID)]
     );
 
-    return result[0].toTuple() as Dao__getProposalDetailsResultProposalDetailsStruct;
+    return changetype<Dao__getProposalDetailsResultProposalDetailsStruct>(
+      result[0].toTuple()
+    );
   }
 
   try_getProposalDetails(
@@ -723,7 +725,9 @@ export class Dao extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(
-      value[0].toTuple() as Dao__getProposalDetailsResultProposalDetailsStruct
+      changetype<Dao__getProposalDetailsResultProposalDetailsStruct>(
+        value[0].toTuple()
+      )
     );
   }
 

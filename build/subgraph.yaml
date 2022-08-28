@@ -1,4 +1,4 @@
-specVersion: 0.0.2
+specVersion: 0.0.4
 description: PoolFactory for Spartan Protocol
 repository: https://github.com/spartan-protocol/spartan-protocol-subgraph
 schema:
@@ -13,7 +13,7 @@ dataSources:
       startBlock: 11466300
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: PoolFactory\PoolFactory.wasm
       entities:
@@ -43,7 +43,7 @@ dataSources:
       startBlock: 11696827
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Dao\Dao.wasm
       entities:
@@ -69,7 +69,7 @@ dataSources:
       startBlock: 12093273
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Router1\Router1.wasm
       entities:
@@ -89,7 +89,7 @@ dataSources:
       startBlock: 12291756
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Router1\Router1.wasm
       entities:
@@ -109,7 +109,7 @@ dataSources:
       startBlock: 15851888
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Router1\Router1.wasm
       entities:
@@ -129,7 +129,7 @@ dataSources:
       startBlock: 12093315
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Reserve1\Reserve1.wasm
       entities:
@@ -149,7 +149,7 @@ dataSources:
       startBlock: 12124514
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: Reserve1\Reserve1.wasm
       entities:
@@ -169,7 +169,7 @@ dataSources:
       startBlock: 12570501
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: SynthVault\SynthVault.wasm
       entities:
@@ -188,7 +188,7 @@ templates:
       abi: Pool
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.4
+      apiVersion: 0.0.6
       language: wasm/assemblyscript
       file: templates\Pool\Pool.wasm
       entities:
