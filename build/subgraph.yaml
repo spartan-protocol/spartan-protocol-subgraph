@@ -10,7 +10,7 @@ dataSources:
     source:
       address: "0x2C577706579E08A88bd30df0Fd7A5778A707c3AD"
       abi: PoolFactory
-      startBlock: 20803547
+      startBlock: 11466300
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -40,7 +40,7 @@ dataSources:
     source:
       address: "0x80531284f27d8b479aCA8dbA18fD6303B4bF1567"
       abi: Dao
-      startBlock: 20803547
+      startBlock: 11696827
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -66,7 +66,7 @@ dataSources:
     source:
       address: "0xfbcdd9270aa6f298851164b2b657eceaf88469be"
       abi: Router
-      startBlock: 20803547
+      startBlock: 12093273
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -86,7 +86,7 @@ dataSources:
     source:
       address: "0xf73d255d1E2b184cDb7ee0a8A064500eB3f6b352"
       abi: Router
-      startBlock: 20803547
+      startBlock: 12291756
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -106,7 +106,7 @@ dataSources:
     source:
       address: "0x048a52a2f0217Dc6fF588Eb62649Ec0b1F577223"
       abi: Router
-      startBlock: 20803547
+      startBlock: 15851888
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -126,7 +126,7 @@ dataSources:
     source:
       address: "0x3e22a572430c10abb6d0508fd567dcf62fd83c0f"
       abi: Reserve
-      startBlock: 20803547
+      startBlock: 12093315
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -146,7 +146,7 @@ dataSources:
     source:
       address: "0xe548561782c2F4f1145B654A41C47F49159913B0"
       abi: Reserve
-      startBlock: 20803547
+      startBlock: 12124514
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
@@ -166,7 +166,7 @@ dataSources:
     source:
       address: "0xa6C3288C18505D134445cB4Fe8499da22002F1E0"
       abi: SynthVault
-      startBlock: 20803547
+      startBlock: 12570501
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.6
