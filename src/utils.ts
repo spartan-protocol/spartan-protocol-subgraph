@@ -192,8 +192,8 @@ export function updateDayMetrics(
   let hourStart = timestamp.mod(ONE_HOUR);
   hourStart = timestamp.minus(hourStart);
   checkMetricsDay(dayStart);
-  checkPoolMetricsDay(dayStart, poolAddr);
-  checkPoolMetricsHour(hourStart, poolAddr);
+  checkPoolMetricsDay(dayStart, poolAddr, dayStart);
+  checkPoolMetricsHour(hourStart, poolAddr, hourStart);
   let global = MetricsGlobalDay.load(dayStart.toString());
   if (global) {
     global.volSPARTA = global.volSPARTA.plus(volSPARTA);
@@ -293,7 +293,11 @@ export function checkMetricsDay(dayStart: BigInt): void {
   }
 }
 
-export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
+export function checkPoolMetricsDay(
+  dayStart: BigInt,
+  poolAddr: string,
+  firstDayStart: BigInt
+): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
   if (poolAddr !== "" && poolFactory) {
     let poolObj = Pool.load(poolAddr);
@@ -305,9 +309,9 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
         let prevPoolId = poolAddr + "#" + prevDay.toString();
         let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
 
-        if (!metricPoolPrev && dayStart.notEqual(GENESIS_TIMESTAMP)) {
-          // Check if yesterday exists (and is not genesis day)
-          checkPoolMetricsDay(prevDay, poolAddr); // If not genesis day & yesterday doesnt exist
+        if (!metricPoolPrev && dayStart.ge(firstDayStart.minus(ONE_MONTH))) {
+          // Check if yesterday exists (and is not >= a month ago)
+          checkPoolMetricsDay(prevDay, poolAddr, firstDayStart); // If not >= a month ago & yesterday doesnt exist
         }
         metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
 
@@ -361,19 +365,20 @@ export function checkPoolMetricsDay(dayStart: BigInt, poolAddr: string): void {
 
 export function checkPoolMetricsHour(
   hourStart: BigInt,
-  poolAddr: string
+  poolAddr: string,
+  firstHourStart: BigInt
 ): void {
   if (poolAddr !== "") {
     let poolid = poolAddr + "#" + hourStart.toString();
-    let metricPoolHr = MetricsPoolHour.load(poolid);
-    if (!metricPoolHr) {
+    let exists = MetricsPoolHour.load(poolid);
+    if (!exists) {
       let prevHour = hourStart.minus(ONE_HOUR);
       let prevPoolId = poolAddr + "#" + prevHour.toString();
       let metricPoolPrev = MetricsPoolHour.load(prevPoolId);
 
-      if (!metricPoolPrev && hourStart.notEqual(GENESIS_TIMESTAMP)) {
-        // Check if yesterday exists (and is not genesis day)
-        checkPoolMetricsHour(prevHour, poolAddr); // If not genesis day & yesterday doesnt exist
+      if (!metricPoolPrev && hourStart.ge(firstHourStart.minus(ONE_DAY))) {
+        // Check if previous hour exists (and is not more than ONE_DAY ago)
+        checkPoolMetricsHour(prevHour, poolAddr, firstHourStart); // If more than 24 hours ago & previous hour doesnt exist
       }
       metricPoolPrev = MetricsPoolHour.load(prevPoolId); // Load updated 'yesterday'
 
@@ -392,7 +397,7 @@ export function checkPoolMetricsHour(
           prevUsdVol = prevUsdVol.minus(metricPool24Hr.volUSD);
         }
       }
-      metricPoolHr = new MetricsPoolHour(poolid);
+      let metricPoolHr = new MetricsPoolHour(poolid);
       metricPoolHr.timestamp = hourStart;
       metricPoolHr.pool = poolAddr;
       metricPoolHr.volSPARTA = ZERO_BD;
