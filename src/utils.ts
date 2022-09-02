@@ -324,8 +324,14 @@ export function checkPoolMetricsDay(
             poolAddr + "#" + dayStart.minus(ONE_MONTH).toString();
           let metricPoolMonth = MetricsPoolDay.load(monthPoolId);
           if (metricPoolMonth) {
-            prevFees = prevFees.minus(metricPoolMonth.fees);
-            prevIncentives = prevIncentives.minus(metricPoolMonth.incentives);
+            prevFees = prevFees.minus(metricPoolMonth.fees).gt(ZERO_BD)
+              ? prevFees.minus(metricPoolMonth.fees)
+              : ZERO_BD;
+            prevIncentives = prevIncentives
+              .minus(metricPoolMonth.incentives)
+              .gt(ZERO_BD)
+              ? prevIncentives.minus(metricPoolMonth.incentives)
+              : ZERO_BD;
           }
         }
         metricPool = new MetricsPoolDay(poolid);
@@ -392,9 +398,17 @@ export function checkPoolMetricsHour(
         let oneDayPoolId = poolAddr + "#" + hourStart.minus(ONE_DAY).toString();
         let metricPool24Hr = MetricsPoolHour.load(oneDayPoolId);
         if (metricPool24Hr) {
-          prevSpartaVol = prevSpartaVol.minus(metricPool24Hr.volSPARTA);
-          prevTokenVol = prevTokenVol.minus(metricPool24Hr.volTOKEN);
-          prevUsdVol = prevUsdVol.minus(metricPool24Hr.volUSD);
+          prevSpartaVol = prevSpartaVol
+            .minus(metricPool24Hr.volSPARTA)
+            .gt(ZERO_BD)
+            ? prevSpartaVol.minus(metricPool24Hr.volSPARTA)
+            : ZERO_BD;
+          prevTokenVol = prevTokenVol.minus(metricPool24Hr.volTOKEN).gt(ZERO_BD)
+            ? prevTokenVol.minus(metricPool24Hr.volTOKEN)
+            : ZERO_BD;
+          prevUsdVol = prevUsdVol.minus(metricPool24Hr.volUSD).gt(ZERO_BD)
+            ? prevUsdVol.minus(metricPool24Hr.volUSD)
+            : ZERO_BD;
         }
       }
       let metricPoolHr = new MetricsPoolHour(poolid);
