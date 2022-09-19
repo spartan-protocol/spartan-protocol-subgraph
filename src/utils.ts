@@ -24,6 +24,8 @@ import {
   ONE_HOUR,
   ONE_MONTH,
   stableCoins,
+  TWO_DAY,
+  TWO_MONTH,
   ZERO_BD,
   ZERO_BI,
 } from "./const";
@@ -309,9 +311,9 @@ export function checkPoolMetricsDay(
         let prevPoolId = poolAddr + "#" + prevDay.toString();
         let metricPoolPrev = MetricsPoolDay.load(prevPoolId);
 
-        if (!metricPoolPrev && dayStart.ge(firstDayStart.minus(ONE_MONTH))) {
-          // Check if yesterday exists (and is not >= a month ago)
-          checkPoolMetricsDay(prevDay, poolAddr, firstDayStart); // If not >= a month ago & yesterday doesnt exist
+        if (!metricPoolPrev && dayStart.ge(firstDayStart.minus(TWO_MONTH))) {
+          // Check if yesterday exists (and is not >= TWO_MONTH ago - i.e. ~60 entities: aim to keep this low to avoid subgraph issues)
+          checkPoolMetricsDay(prevDay, poolAddr, firstDayStart); // If not more than TWO_MONTH ago & previous day does not exist
         }
         metricPoolPrev = MetricsPoolDay.load(prevPoolId); // Load updated 'yesterday'
 
@@ -382,9 +384,9 @@ export function checkPoolMetricsHour(
       let prevPoolId = poolAddr + "#" + prevHour.toString();
       let metricPoolPrev = MetricsPoolHour.load(prevPoolId);
 
-      if (!metricPoolPrev && hourStart.ge(firstHourStart.minus(ONE_DAY))) {
-        // Check if previous hour exists (and is not more than ONE_DAY ago)
-        checkPoolMetricsHour(prevHour, poolAddr, firstHourStart); // If more than 24 hours ago & previous hour doesnt exist
+      if (!metricPoolPrev && hourStart.ge(firstHourStart.minus(TWO_DAY))) {
+        // Check if previous hour exists (and is not more than TWO_DAY ago - i.e. ~48 entities: aim to keep this low to avoid subgraph issues)
+        checkPoolMetricsHour(prevHour, poolAddr, firstHourStart); // If not more than TWO_DAY ago & previous hour does not exist
       }
       metricPoolPrev = MetricsPoolHour.load(prevPoolId); // Load updated 'yesterday'
 
