@@ -10,6 +10,7 @@ import {
 } from "../generated/schema";
 import { addr_poolFactory, ZERO_BD } from "./const";
 import {
+  backfillPoolMetrics,
   checkMember,
   checkPosition,
   getDerivedSparta,
@@ -59,7 +60,8 @@ export function handleHarvest(event: Harvest): void {
       ZERO_BD,
       ZERO_BD,
       harvested,
-      ZERO_BD
+      ZERO_BD,
+      true
     );
   }
 }
@@ -74,6 +76,8 @@ export function handleBond(event: DepositAsset): void {
 
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let derivedSparta = getDerivedSparta(ZERO_BD, inputToken, pool.id);
     let derivedUsd = derivedSparta.times(poolFactory.spartaDerivedUSD);
 

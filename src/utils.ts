@@ -187,7 +187,8 @@ export function updateDayMetrics(
   incentivesUSD: BigDecimal,
   synthVaultHarvest: BigDecimal,
   daoVaultHarvest: BigDecimal,
-  volTOKEN: BigDecimal
+  volTOKEN: BigDecimal,
+  incrTxnCount: boolean
 ): void {
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
@@ -202,7 +203,9 @@ export function updateDayMetrics(
     global.volUSD = global.volUSD.plus(volUSD);
     global.fees = global.fees.plus(fees);
     global.feesUSD = global.feesUSD.plus(feesUSD);
-    global.txCount = global.txCount.plus(ONE_BI);
+    global.txCount = incrTxnCount
+      ? global.txCount.plus(ONE_BI)
+      : global.txCount;
     global.synthVaultHarvest = global.synthVaultHarvest.plus(synthVaultHarvest);
     global.daoVaultHarvest = global.daoVaultHarvest.plus(daoVaultHarvest);
     global.synthVault30Day = global.synthVault30Day.plus(synthVaultHarvest);
@@ -241,7 +244,9 @@ export function updateDayMetrics(
         metricPool.incentives30Day = metricPool.incentives30Day.plus(
           incentives
         );
-        metricPool.txCount = metricPool.txCount.plus(ONE_BI);
+        metricPool.txCount = incrTxnCount
+          ? metricPool.txCount.plus(ONE_BI)
+          : metricPool.txCount;
         metricPool.save();
       }
     }
@@ -352,19 +357,19 @@ export function checkPoolMetricsDay(
         metricPool.incentivesUSD = ZERO_BD;
         metricPool.incentives30Day = prevIncentives;
         metricPool.txCount = ZERO_BI;
-        metricPool.tvlSPARTA = poolObj.tvlSPARTA;
-        metricPool.tvlUSD = poolObj.tvlUSD;
+        metricPool.tvlSPARTA = poolObj.tvlSPARTA; // CAREFUL: Make sure poolObj.tvlSPARTA has not yet been updated with new value
+        metricPool.tvlUSD = poolObj.tvlUSD; // CAREFUL: Make sure poolObj.tvlUSD has not yet been updated with new value
         metricPool.tokenPrice = getDerivedSparta(
           ZERO_BD,
           ONE_BD,
           poolAddr
-        ).times(poolFactory.spartaDerivedUSD);
-        metricPool.lpUnits = poolObj.totalSupply;
+        ).times(poolFactory.spartaDerivedUSD); // CAREFUL: Make sure poolObj has not yet been updated with new tokenAmount && baseAmount values
+        metricPool.lpUnits = poolObj.totalSupply; // CAREFUL: Make sure poolObj.totalSupply has not yet been updated with new value
         metricPool.save();
         let tomorrow = dayStart.plus(ONE_DAY).toString(); // Check tomorrow exists
         let globalTomorrow = MetricsGlobalDay.load(tomorrow); // Check tomorrow exists
         if (!globalTomorrow) {
-          sync(Address.fromString(poolAddr));
+          sync(Address.fromString(poolAddr)); // I feel like this is not required??? Investigate later and potentially try removing it
         }
       }
     }
@@ -425,6 +430,26 @@ export function checkPoolMetricsHour(
       metricPoolHr.save();
     }
   }
+}
+
+export function backfillPoolMetrics(timestamp: BigInt, poolAddr: string): void {
+  // MAKE SURE TO CALL backfillPoolMetrics() before any of these pool values change:
+  // pool.tvlSPARTA || pool.tvlUSD || pool.totalSupply || pool.tokenAmount || pool.baseAmount
+  // And by 2nd-degree: getDerivedSparta() || updateSpartaPrice() || getDerivedToken() || updateTVL() || sync()??
+  updateDayMetrics(
+    timestamp,
+    poolAddr,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    ZERO_BD,
+    false // to ensure backfills are not counted as transactions in the global && pool txnCount metrics
+  );
 }
 
 export function getDerivedSparta(
@@ -520,6 +545,9 @@ export function sync(poolAddr: Address): void {
     let contract = PoolGen.bind(poolAddr);
     let baseAmount = contract.baseAmount();
     if (baseAmount.gt(ZERO_BI)) {
+      // SHOULD WE ADD A DISCREPANCY-CHECK HERE AND ADJUST GLOBAL METRICS (tvlSPARTA? tvlUSD?)???
+      // No, we dont need to because the updateTVL() function uses pool.baseAmount and the previous metric's total TVL values
+      // It basically syncs to 100% correct each time updateTVL is called, as long as the pool values are correct (which i beleive they are)
       pool.baseAmount = BigDecimal.fromString(baseAmount.toString());
     }
     pool.save();

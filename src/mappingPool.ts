@@ -25,6 +25,7 @@ import {
   ZERO_BD,
 } from "./const";
 import {
+  backfillPoolMetrics,
   checkMember,
   checkPosition,
   checkSynthPosition,
@@ -42,6 +43,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
   let pool = Pool.load(poolAddress);
   let poolFactory = PoolFactory.load(addr_poolFactory);
   if (pool && poolFactory) {
+    // Call backfillPoolMetrics() prior to updating pool (ONLY IF NOT THE 1ST LIQ ADD, SEE BELOW)
     let memberAddr = event.params.member.toHexString();
 
     let inputBase = event.params.inputBase.toBigDecimal();
@@ -51,12 +53,15 @@ export function handleAddLiquidity(event: AddLiquidity): void {
 
     let initialAdd =
       pool.baseAmount.equals(ZERO_BD) || pool.tokenAmount.equals(ZERO_BD);
+    if (!initialAdd) {
+      backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool (ONLY IF NOT THE 1ST LIQ ADD)
+    }
     if (initialAdd) {
       totalUnitsIssued = unitsIssued.div(BigDecimal.fromString("0.99"));
     }
-    pool.baseAmount = pool.baseAmount.plus(inputBase);
-    pool.tokenAmount = pool.tokenAmount.plus(inputToken);
-    pool.totalSupply = pool.totalSupply.plus(totalUnitsIssued);
+    pool.baseAmount = pool.baseAmount.plus(inputBase); // Call backfillPoolMetrics() prior to updating pool.baseAmount
+    pool.tokenAmount = pool.tokenAmount.plus(inputToken); // Call backfillPoolMetrics() prior to updating pool.tokenAmount
+    pool.totalSupply = pool.totalSupply.plus(totalUnitsIssued); // Call backfillPoolMetrics() prior to updating pool.totalSupply
     if (initialAdd) {
       pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
       updateSpartaPrice();
@@ -106,7 +111,7 @@ export function handleAddLiquidity(event: AddLiquidity): void {
       pool.save(); // Save pool before updating pricing so that even the initial liqAdd gives a valid value
       updateSpartaPrice();
     }
-    updateTVL(pool.id);
+    updateTVL(pool.id); // Call backfillPoolMetrics() prior to updating pool
   }
 }
 
@@ -115,6 +120,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let memberAddr = event.params.member.toHexString();
 
     let inputUnits = event.params.unitsClaimed.toBigDecimal();
@@ -126,9 +133,9 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     poolFactory.lpUnits = poolFactory.lpUnits.minus(inputUnits);
     poolFactory.save();
 
-    pool.baseAmount = pool.baseAmount.minus(outputBase);
-    pool.tokenAmount = pool.tokenAmount.minus(outputToken);
-    pool.totalSupply = pool.totalSupply.minus(inputUnits);
+    pool.baseAmount = pool.baseAmount.minus(outputBase); // Call backfillPoolMetrics() prior to updating pool.baseAmount
+    pool.tokenAmount = pool.tokenAmount.minus(outputToken); // Call backfillPoolMetrics() prior to updating pool.tokenAmount
+    pool.totalSupply = pool.totalSupply.minus(inputUnits); // Call backfillPoolMetrics() prior to updating pool.totalSupply
     pool.save();
 
     // let transaction = loadTransaction(event);
@@ -167,7 +174,7 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
     }
 
     updateSpartaPrice();
-    updateTVL(pool.id);
+    updateTVL(pool.id); // Call backfillPoolMetrics() prior to updating pool
   }
 }
 
@@ -176,6 +183,8 @@ export function handleSwapped(event: Swapped): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let input = event.params.inputAmount.toBigDecimal();
     let outputAddr = event.params.tokenTo;
     let output = event.params.outputAmount.toBigDecimal();
@@ -253,7 +262,8 @@ export function handleSwapped(event: Swapped): void {
       ZERO_BD,
       ZERO_BD,
       ZERO_BD,
-      derivedToken
+      derivedToken,
+      true
     );
   }
 }
@@ -263,20 +273,22 @@ export function handleMintSynth(event: MintSynth): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let memberAddr = event.params.member.toHexString();
     let synthAddress = event.params.synthAddress.toHexString();
     let inputBase = event.params.baseAmount.toBigDecimal();
     let liqUnits = event.params.liqUnits.toBigDecimal();
     let outputSynth = event.params.synthAmount.toBigDecimal();
-  
+
     let derivedUsd = inputBase.times(poolFactory.spartaDerivedUSD);
     poolFactory.lpUnits = poolFactory.lpUnits.plus(liqUnits);
     poolFactory.save();
-  
+
     pool.baseAmount = pool.baseAmount.plus(inputBase);
     pool.totalSupply = pool.totalSupply.plus(liqUnits);
     pool.save();
-  
+
     // let transaction = loadTransaction(event);
     // let mintSynth = new ForgeSynth(
     //   transaction.id.toString() + "#" + event.logIndex.toString()
@@ -286,7 +298,7 @@ export function handleMintSynth(event: MintSynth): void {
     // mintSynth.timestamp = transaction.timestamp;
     // mintSynth.pool = pool.id;
     // mintSynth.token = pool.token0;
-  
+
     checkMember(memberAddr);
     // mintSynth.member = memberAddr;
     // mintSynth.origin = event.transaction.from;
@@ -294,22 +306,24 @@ export function handleMintSynth(event: MintSynth): void {
     // mintSynth.mintedSynths = outputSynth;
     // mintSynth.derivedUSD = derivedUsd;
     // mintSynth.save();
-  
+
     let member = Member.load(memberAddr);
     if (member) {
       member.netForgeSparta = member.netForgeSparta.plus(inputBase);
       member.netForgeUsd = member.netForgeUsd.plus(derivedUsd);
       member.save();
-    
+
       checkSynthPosition(memberAddr, synthAddress);
       let synthPosition = SynthPosition.load(memberAddr + "#" + synthAddress);
       if (synthPosition) {
-        synthPosition.netForgeSparta = synthPosition.netForgeSparta.plus(inputBase);
+        synthPosition.netForgeSparta = synthPosition.netForgeSparta.plus(
+          inputBase
+        );
         synthPosition.netForgeUsd = synthPosition.netForgeUsd.plus(derivedUsd);
         synthPosition.save();
       }
     }
-  
+
     updateSpartaPrice();
     updateTVL(pool.id);
     updateDayMetrics(
@@ -323,10 +337,10 @@ export function handleMintSynth(event: MintSynth): void {
       ZERO_BD,
       ZERO_BD,
       ZERO_BD,
-      outputSynth
+      outputSynth,
+      true
     );
   }
-
 }
 
 export function handleBurnSynth(event: BurnSynth): void {
@@ -334,6 +348,8 @@ export function handleBurnSynth(event: BurnSynth): void {
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let memberAddr = event.params.member.toHexString();
     let synthAddress = event.params.synthAddress.toHexString();
     let inputSynth = event.params.synthAmount.toBigDecimal();
@@ -342,10 +358,10 @@ export function handleBurnSynth(event: BurnSynth): void {
     let derivedUsd = outputBase.times(poolFactory.spartaDerivedUSD);
     poolFactory.lpUnits = poolFactory.lpUnits.minus(liqUnits);
     poolFactory.save();
-  
+
     pool.totalSupply = pool.totalSupply.minus(liqUnits);
     pool.baseAmount = pool.baseAmount.minus(outputBase);
-  
+
     // let transaction = loadTransaction(event);
     // let burnSynth = new MeltSynth(
     //   transaction.id.toString() + "#" + event.logIndex.toString()
@@ -355,7 +371,7 @@ export function handleBurnSynth(event: BurnSynth): void {
     // burnSynth.timestamp = transaction.timestamp;
     // burnSynth.pool = pool.id;
     // burnSynth.token = pool.token0;
-  
+
     checkMember(memberAddr);
     // burnSynth.member = memberAddr;
     // burnSynth.origin = event.transaction.from;
@@ -363,22 +379,24 @@ export function handleBurnSynth(event: BurnSynth): void {
     // burnSynth.burnedSynths = inputSynth;
     // burnSynth.derivedUSD = derivedUsd;
     // burnSynth.save();
-  
+
     let member = Member.load(memberAddr);
     if (member) {
       member.netMeltSparta = member.netMeltSparta.plus(outputBase);
       member.netMeltUsd = member.netMeltUsd.plus(derivedUsd);
       member.save();
-    
+
       checkSynthPosition(memberAddr, synthAddress);
       let synthPosition = SynthPosition.load(memberAddr + "#" + synthAddress);
       if (synthPosition) {
-        synthPosition.netMeltSparta = synthPosition.netMeltSparta.plus(outputBase);
+        synthPosition.netMeltSparta = synthPosition.netMeltSparta.plus(
+          outputBase
+        );
         synthPosition.netMeltUsd = synthPosition.netMeltUsd.plus(derivedUsd);
         synthPosition.save();
       }
     }
-  
+
     pool.save();
     updateSpartaPrice();
     updateTVL(pool.id);
@@ -393,8 +411,8 @@ export function handleBurnSynth(event: BurnSynth): void {
       ZERO_BD,
       ZERO_BD,
       ZERO_BD,
-      inputSynth
+      inputSynth,
+      true
     );
   }
-
 }

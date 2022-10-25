@@ -2,6 +2,7 @@ import { RealisePOL } from "../generated/Reserve2/Reserve";
 import { Pool, PoolFactory } from "../generated/schema";
 import { addr_poolFactory, ZERO_BD } from "./const";
 import {
+  backfillPoolMetrics,
   getDerivedSparta,
   updateDayMetrics,
   updateSpartaPrice,
@@ -13,6 +14,8 @@ export function handleRealisePOL(event: RealisePOL): void {
   let poolAddress = event.params.pool.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
+    backfillPoolMetrics(event.block.timestamp, pool.id); // Call backfillPoolMetrics() prior to updating pool
+
     let inputToken = event.params.amount.toBigDecimal();
     let derivedSparta = getDerivedSparta(ZERO_BD, inputToken, poolAddress);
     let derivedUSD = derivedSparta.times(poolFactory.spartaDerivedUSD);
@@ -33,7 +36,8 @@ export function handleRealisePOL(event: RealisePOL): void {
       derivedUSD,
       ZERO_BD,
       ZERO_BD,
-      ZERO_BD
+      ZERO_BD,
+      true
     );
   }
 }
