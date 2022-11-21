@@ -165,6 +165,83 @@ export class Token extends Entity {
   }
 }
 
+export class Origin extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Origin entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Origin must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("Origin", id.toString(), this);
+    }
+  }
+
+  static load(id: string): Origin | null {
+    return changetype<Origin | null>(store.get("Origin", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get volSPARTA(): BigDecimal {
+    let value = this.get("volSPARTA");
+    return value!.toBigDecimal();
+  }
+
+  set volSPARTA(value: BigDecimal) {
+    this.set("volSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get volTOKEN(): BigDecimal {
+    let value = this.get("volTOKEN");
+    return value!.toBigDecimal();
+  }
+
+  set volTOKEN(value: BigDecimal) {
+    this.set("volTOKEN", Value.fromBigDecimal(value));
+  }
+
+  get volUSD(): BigDecimal {
+    let value = this.get("volUSD");
+    return value!.toBigDecimal();
+  }
+
+  set volUSD(value: BigDecimal) {
+    this.set("volUSD", Value.fromBigDecimal(value));
+  }
+
+  get fees(): BigDecimal {
+    let value = this.get("fees");
+    return value!.toBigDecimal();
+  }
+
+  set fees(value: BigDecimal) {
+    this.set("fees", Value.fromBigDecimal(value));
+  }
+
+  get feesUSD(): BigDecimal {
+    let value = this.get("feesUSD");
+    return value!.toBigDecimal();
+  }
+
+  set feesUSD(value: BigDecimal) {
+    this.set("feesUSD", Value.fromBigDecimal(value));
+  }
+}
+
 export class Pool extends Entity {
   constructor(id: string) {
     super();
@@ -855,6 +932,121 @@ export class MetricsGlobalDay extends Entity {
 
   set lpUnits(value: BigDecimal) {
     this.set("lpUnits", Value.fromBigDecimal(value));
+  }
+}
+
+export class MetricsOriginDay extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save MetricsOriginDay entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type MetricsOriginDay must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`
+      );
+      store.set("MetricsOriginDay", id.toString(), this);
+    }
+  }
+
+  static load(id: string): MetricsOriginDay | null {
+    return changetype<MetricsOriginDay | null>(
+      store.get("MetricsOriginDay", id)
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    return value!.toString();
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get timestamp(): BigInt {
+    let value = this.get("timestamp");
+    return value!.toBigInt();
+  }
+
+  set timestamp(value: BigInt) {
+    this.set("timestamp", Value.fromBigInt(value));
+  }
+
+  get origin(): string {
+    let value = this.get("origin");
+    return value!.toString();
+  }
+
+  set origin(value: string) {
+    this.set("origin", Value.fromString(value));
+  }
+
+  get volSPARTA(): BigDecimal {
+    let value = this.get("volSPARTA");
+    return value!.toBigDecimal();
+  }
+
+  set volSPARTA(value: BigDecimal) {
+    this.set("volSPARTA", Value.fromBigDecimal(value));
+  }
+
+  get volTOKEN(): BigDecimal {
+    let value = this.get("volTOKEN");
+    return value!.toBigDecimal();
+  }
+
+  set volTOKEN(value: BigDecimal) {
+    this.set("volTOKEN", Value.fromBigDecimal(value));
+  }
+
+  get volUSD(): BigDecimal {
+    let value = this.get("volUSD");
+    return value!.toBigDecimal();
+  }
+
+  set volUSD(value: BigDecimal) {
+    this.set("volUSD", Value.fromBigDecimal(value));
+  }
+
+  get fees(): BigDecimal {
+    let value = this.get("fees");
+    return value!.toBigDecimal();
+  }
+
+  set fees(value: BigDecimal) {
+    this.set("fees", Value.fromBigDecimal(value));
+  }
+
+  get feesUSD(): BigDecimal {
+    let value = this.get("feesUSD");
+    return value!.toBigDecimal();
+  }
+
+  set feesUSD(value: BigDecimal) {
+    this.set("feesUSD", Value.fromBigDecimal(value));
+  }
+
+  get fees30Day(): BigDecimal {
+    let value = this.get("fees30Day");
+    return value!.toBigDecimal();
+  }
+
+  set fees30Day(value: BigDecimal) {
+    this.set("fees30Day", Value.fromBigDecimal(value));
+  }
+
+  get txCount(): BigInt {
+    let value = this.get("txCount");
+    return value!.toBigInt();
+  }
+
+  set txCount(value: BigInt) {
+    this.set("txCount", Value.fromBigInt(value));
   }
 }
 

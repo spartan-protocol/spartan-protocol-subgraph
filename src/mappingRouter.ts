@@ -37,7 +37,8 @@ export function handleDividend(event: Dividend): void {
       ZERO_BD,
       ZERO_BD,
       ZERO_BD,
-      true
+      true,
+      ""
     );
   }
 }

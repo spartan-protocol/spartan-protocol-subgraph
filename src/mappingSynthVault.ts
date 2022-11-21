@@ -46,7 +46,8 @@ export function handleMemberHarvests(event: MemberHarvests): void {
       harvested,
       ZERO_BD,
       ZERO_BD,
-      true
+      true,
+      ""
     );
   }
 }

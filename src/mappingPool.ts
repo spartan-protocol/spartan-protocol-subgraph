@@ -180,6 +180,8 @@ export function handleRemoveLiquidity(event: RemoveLiquidity): void {
 
 export function handleSwapped(event: Swapped): void {
   let poolFactory = PoolFactory.load(addr_poolFactory);
+  let originAddress = event.transaction.to;
+  let originAddressStr = originAddress ? originAddress.toHexString() : "";
   let poolAddress = event.address.toHexString();
   let pool = Pool.load(poolAddress);
   if (pool && poolFactory) {
@@ -263,7 +265,8 @@ export function handleSwapped(event: Swapped): void {
       ZERO_BD,
       ZERO_BD,
       derivedToken,
-      true
+      true,
+      originAddressStr
     );
   }
 }
@@ -338,7 +341,8 @@ export function handleMintSynth(event: MintSynth): void {
       ZERO_BD,
       ZERO_BD,
       outputSynth,
-      true
+      true,
+      ""
     );
   }
 }
@@ -412,7 +416,8 @@ export function handleBurnSynth(event: BurnSynth): void {
       ZERO_BD,
       ZERO_BD,
       inputSynth,
-      true
+      true,
+      ""
     );
   }
 }

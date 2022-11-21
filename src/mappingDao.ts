@@ -61,7 +61,8 @@ export function handleHarvest(event: Harvest): void {
       ZERO_BD,
       harvested,
       ZERO_BD,
-      true
+      true,
+      ""
     );
   }
 }

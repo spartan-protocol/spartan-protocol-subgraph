@@ -6,10 +6,12 @@ import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import {
   PoolFactory,
   // Transaction,
+  Origin,
   Pool,
   Token,
   Member,
   MetricsGlobalDay,
+  MetricsOriginDay,
   MetricsPoolDay,
   Position,
   SynthPosition,
@@ -188,7 +190,8 @@ export function updateDayMetrics(
   synthVaultHarvest: BigDecimal,
   daoVaultHarvest: BigDecimal,
   volTOKEN: BigDecimal,
-  incrTxnCount: boolean
+  incrTxnCount: boolean,
+  originAddr: string
 ): void {
   let dayStart = timestamp.mod(ONE_DAY);
   dayStart = timestamp.minus(dayStart);
@@ -197,6 +200,7 @@ export function updateDayMetrics(
   checkMetricsDay(dayStart);
   checkPoolMetricsDay(dayStart, poolAddr, dayStart);
   checkPoolMetricsHour(hourStart, poolAddr, hourStart);
+  checkOriginMetricsDay(dayStart, originAddr, dayStart);
   let global = MetricsGlobalDay.load(dayStart.toString());
   if (global) {
     global.volSPARTA = global.volSPARTA.plus(volSPARTA);
@@ -250,6 +254,31 @@ export function updateDayMetrics(
         metricPool.save();
       }
     }
+    if (originAddr !== "") {
+      let originObj = Origin.load(originAddr);
+      if (originObj) {
+        originObj.volSPARTA = originObj.volSPARTA.plus(volSPARTA);
+        originObj.volTOKEN = originObj.volTOKEN.plus(volTOKEN);
+        originObj.volUSD = originObj.volUSD.plus(volUSD);
+        originObj.fees = originObj.fees.plus(fees);
+        originObj.feesUSD = originObj.feesUSD.plus(feesUSD);
+        originObj.save();
+        let originid = originAddr + "#" + dayStart.toString();
+        let metricOrigin = MetricsOriginDay.load(originid);
+        if (metricOrigin) {
+          metricOrigin.volSPARTA = metricOrigin.volSPARTA.plus(volSPARTA);
+          metricOrigin.volTOKEN = metricOrigin.volTOKEN.plus(volTOKEN);
+          metricOrigin.volUSD = metricOrigin.volUSD.plus(volUSD);
+          metricOrigin.fees = metricOrigin.fees.plus(fees);
+          metricOrigin.feesUSD = metricOrigin.feesUSD.plus(feesUSD);
+          metricOrigin.fees30Day = metricOrigin.fees30Day.plus(fees);
+          metricOrigin.txCount = incrTxnCount
+            ? metricOrigin.txCount.plus(ONE_BI)
+            : metricOrigin.txCount;
+          metricOrigin.save();
+        }
+      }
+    }
   }
 }
 
@@ -296,6 +325,63 @@ export function checkMetricsDay(dayStart: BigInt): void {
       global.daoVault30Day = prevDaoVault;
       global.lpUnits = poolFactory.lpUnits;
       global.save();
+    }
+  }
+}
+
+export function checkOriginMetricsDay(
+  dayStart: BigInt,
+  originAddr: string,
+  firstDayStart: BigInt
+): void {
+  let poolFactory = PoolFactory.load(addr_poolFactory);
+  if (originAddr !== "" && poolFactory) {
+    let originObj = Origin.load(originAddr);
+    if (!originObj) {
+      originObj = new Origin(originAddr);
+      originObj.volSPARTA = ZERO_BD;
+      originObj.volTOKEN = ZERO_BD;
+      originObj.volUSD = ZERO_BD;
+      originObj.fees = ZERO_BD;
+      originObj.feesUSD = ZERO_BD;
+      originObj.save();
+    }
+    let originid = originAddr + "#" + dayStart.toString();
+    let metricOrigin = MetricsOriginDay.load(originid);
+    if (!metricOrigin) {
+      let prevDay = dayStart.minus(ONE_DAY);
+      let prevOriginId = originAddr + "#" + prevDay.toString();
+      let metricOriginPrev = MetricsOriginDay.load(prevOriginId);
+
+      if (!metricOriginPrev && dayStart.ge(firstDayStart.minus(TWO_MONTH))) {
+        // Check if yesterday exists (and is not >= TWO_MONTH ago - i.e. ~60 entities: aim to keep this low to avoid subgraph issues)
+        checkOriginMetricsDay(prevDay, originAddr, firstDayStart); // If not more than TWO_MONTH ago & previous day does not exist
+      }
+      metricOriginPrev = MetricsOriginDay.load(prevOriginId); // Load updated 'yesterday'
+
+      let prevFees = ZERO_BD;
+      if (metricOriginPrev) {
+        prevFees = metricOriginPrev.fees30Day;
+        let monthOriginId =
+          originAddr + "#" + dayStart.minus(ONE_MONTH).toString();
+        let metricOriginMonth = MetricsOriginDay.load(monthOriginId);
+        if (metricOriginMonth) {
+          prevFees = prevFees.minus(metricOriginMonth.fees).gt(ZERO_BD)
+            ? prevFees.minus(metricOriginMonth.fees)
+            : ZERO_BD;
+        }
+      }
+      metricOrigin = new MetricsOriginDay(originid);
+      metricOrigin.timestamp = dayStart;
+      metricOrigin.origin = originAddr;
+      metricOrigin.volSPARTA = ZERO_BD;
+      metricOrigin.volTOKEN = ZERO_BD;
+      metricOrigin.volUSD = ZERO_BD;
+      metricOrigin.fees = ZERO_BD;
+      metricOrigin.feesUSD = ZERO_BD;
+      metricOrigin.fees30Day = prevFees;
+      metricOrigin.txCount = ZERO_BI;
+      metricOrigin.save();
     }
   }
 }
@@ -448,7 +534,8 @@ export function backfillPoolMetrics(timestamp: BigInt, poolAddr: string): void {
     ZERO_BD,
     ZERO_BD,
     ZERO_BD,
-    false // to ensure backfills are not counted as transactions in the global && pool txnCount metrics
+    false, // to ensure backfills are not counted as transactions in the global && pool txnCount metrics
+    ""
   );
 }
 

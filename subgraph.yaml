@@ -197,6 +197,7 @@ templates:
       entities:
         - Pool
         - Member
+        - Origin
         # - Transaction
         # - LiqAdd
         # - LiqRemove

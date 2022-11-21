@@ -194,6 +194,7 @@ templates:
       entities:
         - Pool
         - Member
+        - Origin
         - Position
       abis:
         - name: Pool

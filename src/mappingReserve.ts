@@ -37,7 +37,8 @@ export function handleRealisePOL(event: RealisePOL): void {
       ZERO_BD,
       ZERO_BD,
       ZERO_BD,
-      true
+      true,
+      ""
     );
   }
 }
